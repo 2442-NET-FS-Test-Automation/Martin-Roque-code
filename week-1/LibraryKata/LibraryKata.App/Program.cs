@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.Design;
+﻿using LibraryKata.Domain;
 
 namespace LibraryKata.App; //Logical container for related code files
 
@@ -11,6 +11,7 @@ public class Program
         ControlFlow();
         Loops();
         ArraysWork();
+        ClassesExample();
     }
 
     private static void DataTypesAndOperatos()
@@ -49,7 +50,7 @@ public class Program
         //bool isMember = true;
 
         // if - else if - else
-        if(copiesAvailable > 1)
+        if (copiesAvailable > 1)
             Console.WriteLine("Many available for checkout!");
         else if (copiesAvailable == 1)
             Console.WriteLine("Last copy!");
@@ -57,7 +58,7 @@ public class Program
         {
             Console.WriteLine("Out of stock!");
             Console.WriteLine("Check again later!");
-        }    
+        }
 
         //Switch
         string genre = "Mystery";
@@ -84,12 +85,12 @@ public class Program
             _ => "Uh oh" //default case
         };
         Console.WriteLine(section);
-            
+
     }
 
     private static void Loops()
     {
-        for (int day = 1; day<=3; day++)
+        for (int day = 1; day <= 3; day++)
         {
             Console.WriteLine($"Reminder day {day}: fee so far {CalculateLateFee(day)}");
         }
@@ -104,16 +105,17 @@ public class Program
         Console.WriteLine("No copies on shelf!");
 
         //Unmutable string
-        string myString = "dog";
+        /*string myString = "dog";
 
         myString = "cat";
+        */
     }
 
     private static decimal CalculateLateFee(int daysLate) => daysLate * 2.05m;
 
     private static void ArraysWork()
     {
-        string[] books = {"Dune", "Harry Potter", "Percy Jackson", "Lord of the Rings"};
+        string[] books = { "Dune", "Harry Potter", "Percy Jackson", "Lord of the Rings" };
 
         Console.WriteLine(books[2]);
 
@@ -123,5 +125,20 @@ public class Program
         }
     }
 
+    private static void ClassesExample()
+    {
+        Console.WriteLine("Using our domain Book class");
+
+        Book dune = new Book("Dune", "Frank Herbert", 3);
+        Book littlePrince = new Book("The Little Prince", "Antoine de Saint-Exupéry", 0);
+
+        //printing book info
+        //This to lines do the same thing
+        Console.WriteLine(dune);
+        Console.WriteLine(littlePrince.ToString());
+
+        Console.WriteLine($"Checking out Dune: {dune.Checkout()}");
+        Console.WriteLine($"Checking out Little Prince: {littlePrince.Checkout()}");
+    }
 
 }
