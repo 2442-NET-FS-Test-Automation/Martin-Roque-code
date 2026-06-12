@@ -9,6 +9,8 @@ public class Program
     {
         DataTypesAndOperatos();
         ControlFlow();
+        Loops();
+        ArraysWork();
     }
 
     private static void DataTypesAndOperatos()
@@ -44,7 +46,7 @@ public class Program
         Console.WriteLine("\n== Control Flow ==");
 
         int copiesAvailable = 0;
-        bool isMember = true;
+        //bool isMember = true;
 
         // if - else if - else
         if(copiesAvailable > 1)
@@ -72,6 +74,54 @@ public class Program
                 Console.WriteLine("Uh oh");
                 break;
         }
+
+        // New in .NET 8, Switch Expressions
+        string section = genre switch
+        {
+            //Expression body
+            "Mystery" => "Section A",
+            "Science-Fiction" => "Section F",
+            _ => "Uh oh" //default case
+        };
+        Console.WriteLine(section);
             
     }
+
+    private static void Loops()
+    {
+        for (int day = 1; day<=3; day++)
+        {
+            Console.WriteLine($"Reminder day {day}: fee so far {CalculateLateFee(day)}");
+        }
+
+        int onShelf = 3;
+        while (onShelf > 0)
+        {
+            Console.WriteLine($"{onShelf} copies on the shelf!");
+            onShelf--;
+        }
+
+        Console.WriteLine("No copies on shelf!");
+
+        //Unmutable string
+        string myString = "dog";
+
+        myString = "cat";
+    }
+
+    private static decimal CalculateLateFee(int daysLate) => daysLate * 2.05m;
+
+    private static void ArraysWork()
+    {
+        string[] books = {"Dune", "Harry Potter", "Percy Jackson", "Lord of the Rings"};
+
+        Console.WriteLine(books[2]);
+
+        foreach (string book in books)
+        {
+            Console.WriteLine(book);
+        }
+    }
+
+
 }
