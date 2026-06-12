@@ -1,13 +1,14 @@
-﻿namespace LibraryKata.App; //Logical container for related code files
+﻿using System.ComponentModel.Design;
+
+namespace LibraryKata.App; //Logical container for related code files
 
 public class Program
 {
-    
-
     //main method
     public static void Main()
     {
         DataTypesAndOperatos();
+        ControlFlow();
     }
 
     private static void DataTypesAndOperatos()
@@ -36,5 +37,41 @@ public class Program
         Console.WriteLine($"{title} on shelf: {shelf}: {copies} copies, fee: {lateFee}");
 
         total += 1; //assignment operator
+    }
+
+    private static void ControlFlow()
+    {
+        Console.WriteLine("\n== Control Flow ==");
+
+        int copiesAvailable = 0;
+        bool isMember = true;
+
+        // if - else if - else
+        if(copiesAvailable > 1)
+            Console.WriteLine("Many available for checkout!");
+        else if (copiesAvailable == 1)
+            Console.WriteLine("Last copy!");
+        else
+        {
+            Console.WriteLine("Out of stock!");
+            Console.WriteLine("Check again later!");
+        }    
+
+        //Switch
+        string genre = "Mystery";
+
+        switch (genre)
+        {
+            case "Mystery":
+                Console.WriteLine("Check Section A!");
+                break;
+            case "Science-Fiction":
+                Console.WriteLine("Check Section F!");
+                break;
+            default:
+                Console.WriteLine("Uh oh");
+                break;
+        }
+            
     }
 }
