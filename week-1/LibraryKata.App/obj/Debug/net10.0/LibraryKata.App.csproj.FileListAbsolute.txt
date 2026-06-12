@@ -1,0 +1,15 @@
+C:\Users\martr\Martin-Roque-code\week-1\LibraryKata.App\bin\Debug\net10.0\LibraryKata.App.exe
+C:\Users\martr\Martin-Roque-code\week-1\LibraryKata.App\bin\Debug\net10.0\LibraryKata.App.deps.json
+C:\Users\martr\Martin-Roque-code\week-1\LibraryKata.App\bin\Debug\net10.0\LibraryKata.App.runtimeconfig.json
+C:\Users\martr\Martin-Roque-code\week-1\LibraryKata.App\bin\Debug\net10.0\LibraryKata.App.dll
+C:\Users\martr\Martin-Roque-code\week-1\LibraryKata.App\bin\Debug\net10.0\LibraryKata.App.pdb
+C:\Users\martr\Martin-Roque-code\week-1\LibraryKata.App\obj\Debug\net10.0\LibraryKata.App.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\martr\Martin-Roque-code\week-1\LibraryKata.App\obj\Debug\net10.0\LibraryKata.App.AssemblyInfoInputs.cache
+C:\Users\martr\Martin-Roque-code\week-1\LibraryKata.App\obj\Debug\net10.0\LibraryKata.App.AssemblyInfo.cs
+C:\Users\martr\Martin-Roque-code\week-1\LibraryKata.App\obj\Debug\net10.0\LibraryKata.App.csproj.CoreCompileInputs.cache
+C:\Users\martr\Martin-Roque-code\week-1\LibraryKata.App\obj\Debug\net10.0\LibraryKata.App.sourcelink.json
+C:\Users\martr\Martin-Roque-code\week-1\LibraryKata.App\obj\Debug\net10.0\LibraryKata.App.dll
+C:\Users\martr\Martin-Roque-code\week-1\LibraryKata.App\obj\Debug\net10.0\refint\LibraryKata.App.dll
+C:\Users\martr\Martin-Roque-code\week-1\LibraryKata.App\obj\Debug\net10.0\LibraryKata.App.pdb
+C:\Users\martr\Martin-Roque-code\week-1\LibraryKata.App\obj\Debug\net10.0\LibraryKata.App.genruntimeconfig.cache
+C:\Users\martr\Martin-Roque-code\week-1\LibraryKata.App\obj\Debug\net10.0\ref\LibraryKata.App.dll
