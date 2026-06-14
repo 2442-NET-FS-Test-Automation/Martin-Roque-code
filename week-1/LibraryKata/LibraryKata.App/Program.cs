@@ -12,6 +12,7 @@ public class Program
         Loops();
         ArraysWork();
         ClassesExample();
+        OopDemo();
     }
 
     private static void DataTypesAndOperatos()
@@ -140,5 +141,47 @@ public class Program
         Console.WriteLine($"Checking out Dune: {dune.Checkout()}");
         Console.WriteLine($"Checking out Little Prince: {littlePrince.Checkout()}");
     }
+
+    public static void OopDemo()
+    {
+
+        Console.WriteLine("\n\n == OOP Demo stuff == ");
+
+        // Leveraging polymorphism - Books, ReferenceBooks, Magazines - all are LibraryItems.
+        LibraryItem[] catalog =
+        {
+            new Book("Dune", "Frank Herbert", 2),
+            new ReferenceBook("C# Language Standards", "Microsoft", "Technology"),
+            new Magazine("Sports Illustrated", "Francisco", 5, "Conde Naste")
+        };
+
+        foreach (LibraryItem item in catalog)
+        {
+            Console.WriteLine(item.Describe());
+        }
+
+        // We can even use interfaces as reference types
+        foreach (LibraryItem item in catalog)
+        {
+            if (item is ILendable lendable)
+            {
+                Console.WriteLine($"{item.Title}: checkout -> {lendable.Checkout()}");
+            }
+            else
+            {
+                Console.WriteLine($"{item.Title} is Reference only.");
+            }
+        }
+
+        // override vs new behavior
+        Magazine wired = new Magazine("Wired", "Luis", 3, "Conde Nast");
+        LibraryItem baseMag = wired;
+
+        Console.WriteLine("== Override vs new on the same object, different ref type");
+        Console.WriteLine($"Magazine reference -> {wired.ShelfLabel()}");
+        Console.WriteLine($"LibraryItem reference -> {baseMag.ShelfLabel()}");
+
+    }
+
 
 }
