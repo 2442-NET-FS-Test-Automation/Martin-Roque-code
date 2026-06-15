@@ -2,14 +2,16 @@
 
 namespace CarWorkshop.App;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(String[] args)
     {
         List<Vehicle> inventory =
         [
             new Car("Toyota", "Camry", 12000, 4),
-            new Motorcycle("Honda", "CBR500R", 4500, false)
+            new Motorcycle("Honda", "CBR500R", 4500, false),
+            new Car("Ford", "Mustang", 5700, 2),
+            new Motorcycle("Yamaha", "MT-07", 3500, false)
         ];
 
         ShowMenu(inventory);
@@ -130,13 +132,13 @@ class Program
 
         while (isRunning)
         {
-            Console.WriteLine("\n=== Garage Menu ===");
-            Console.WriteLine("1. List inventory");
-            Console.WriteLine("2. Service all vehicles");
-            Console.WriteLine("3. Add new vehicle");
-            Console.WriteLine("4. Show miles remaining for service by id");
-            Console.WriteLine("5. Show wash equipment by id");
-            Console.WriteLine("6. Exit");
+            Console.WriteLine("\n=== Workshop Menu ===");
+            Console.WriteLine("1.- Inventory");
+            Console.WriteLine("2.- Service all vehicles available");
+            Console.WriteLine("3.- Add new vehicle (Car or Motorcycle)");
+            Console.WriteLine("4.- Show miles remaining for service by Vehicle id");
+            Console.WriteLine("5.- Show wash equipment by  Vehicle id");
+            Console.WriteLine("6.- Finish and exit");
             Console.Write("Choose an option: ");
 
             string? choice = Console.ReadLine();
