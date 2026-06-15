@@ -8,13 +8,8 @@ public class Program
     {
         List<Vehicle> inventory =
         [
-<<<<<<< HEAD
             new Car("Toyota", "Camry", 12000, 4),
             new Motorcycle("Honda", "CBR500R", 4500, false),
-=======
-            new Car("Toyota", "Camry", 1000, 4),
-            new Motorcycle("Honda", "CBR500R", 0, true),
->>>>>>> 45fb3bef48840e478d1f11af2a05dce7ac8fa2b8
             new Car("Ford", "Mustang", 5700, 2),
             new Motorcycle("Yamaha", "MT-07", 3500, false)
         ];
