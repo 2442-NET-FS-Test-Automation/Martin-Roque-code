@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\martr\\Martin-Roque-code\\week-1\\LibraryKata\\Library.Domain\\Library.Domain.csproj",
+      "projectUniqueName": "C:\\Users\\martr\\Martin-Roque-code\\week-1\\LibraryKata\\LibraryKata.Domain\\Library.Domain.csproj",
       "projectName": "Library.Domain",
-      "projectPath": "C:\\Users\\martr\\Martin-Roque-code\\week-1\\LibraryKata\\Library.Domain\\Library.Domain.csproj",
+      "projectPath": "C:\\Users\\martr\\Martin-Roque-code\\week-1\\LibraryKata\\LibraryKata.Domain\\Library.Domain.csproj",
       "packagesPath": "C:\\Users\\martr\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\martr\\Martin-Roque-code\\week-1\\LibraryKata\\Library.Domain\\obj\\",
+      "outputPath": "C:\\Users\\martr\\Martin-Roque-code\\week-1\\LibraryKata\\LibraryKata.Domain\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\martr\\AppData\\Roaming\\NuGet\\NuGet.Config"

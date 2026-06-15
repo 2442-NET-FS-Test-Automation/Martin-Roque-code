@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Library.Domain\Library.Domain.csproj" />
+    <ProjectReference Include="..\LibraryKata.Domain\Library.Domain.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
