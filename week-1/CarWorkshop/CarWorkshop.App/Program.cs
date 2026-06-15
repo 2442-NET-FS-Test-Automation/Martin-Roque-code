@@ -8,8 +8,10 @@ class Program
     {
         List<Vehicle> inventory =
         [
-            new Car("Toyota", "Camry", 12000, 4),
-            new Motorcycle("Honda", "CBR500R", 4500, false)
+            new Car("Toyota", "Camry", 1000, 4),
+            new Motorcycle("Honda", "CBR500R", 0, true),
+            new Car("Ford", "Mustang", 5700, 2),
+            new Motorcycle("Yamaha", "MT-07", 3500, false)
         ];
 
         ShowMenu(inventory);
