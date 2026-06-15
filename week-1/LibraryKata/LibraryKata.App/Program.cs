@@ -13,6 +13,7 @@ public class Program
         ArraysWork();
         ClassesExample();
         OopDemo();
+        CollectionsDemo();
     }
 
     private static void DataTypesAndOperatos()
@@ -180,6 +181,42 @@ public class Program
         Console.WriteLine("== Override vs new on the same object, different ref type");
         Console.WriteLine($"Magazine reference -> {wired.ShelfLabel()}");
         Console.WriteLine($"LibraryItem reference -> {baseMag.ShelfLabel()}");
+
+    }
+
+    private static void CollectionsDemo()
+    {
+        Console.WriteLine("==== Collections Demo Stuff ====");
+
+        Catalog catalog = new();
+
+        Book dune = new Book("Dune", "Frank Herbert", 3);
+
+        catalog._items.Add(dune);
+
+        catalog._items.Add(new ReferenceBook("C# Language Specs", "Microsoft", "Technology"));
+        catalog._items.Add(new Magazine("Nat Geo", "Charlie", 4, "Conde Naste"));
+
+        Console.WriteLine($"Catalog holds {catalog._items.Count}; first is {catalog._items[0].Title}");
+
+        ItemKind kind = ItemKind.Magazine;
+
+        ShelfLocation whereIs = new ShelfLocation(3, 12);
+
+        Console.WriteLine($"{kind} sits at {whereIs}");
+
+        //Book duneCopy = dune; //copies the reference
+
+        //ShelfLocation location = whereIs; //copies the data/fields
+
+        //Generics
+        Shelf<LibraryItem> shelf = new Shelf<LibraryItem>(2);
+        Shelf<int> intShelf = new Shelf<int>(200);
+
+        shelf.TryAdd(catalog._items[0]);
+        shelf.TryAdd(catalog._items[1]);
+
+        Console.WriteLine($"Trying to add a third item in our shelf: {shelf.TryAdd(catalog._items[2])}");
 
     }
 
