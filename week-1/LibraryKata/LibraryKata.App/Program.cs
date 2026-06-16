@@ -21,6 +21,7 @@ public class Program
         ClassesExample();
         OopDemo();
         CollectionsDemo();
+        ExceptionsDemo();
 
         Log.CloseAndFlush();
     }
@@ -249,5 +250,64 @@ public class Program
 
     }
 
+    public static void ExceptionsDemo()
+    {
+        Console.WriteLine("\n == Exceptions, patterns, logging ==");
+
+        ILibraryRepository repo = new InMemoryLibraryRepository();
+
+        IUnitOfWork libraryWork = new LibraryUnitOfWork(repo);
+
+        LibraryItem dune = LibraryItemFactory.Create(ItemKind.Book, "Dune", "Frank Herber", copies: 3);
+
+        repo.Add(dune);
+
+        repo.Add(LibraryItemFactory.Create(ItemKind.Magazine, "Wired", "Axel", copies: 2));
+
+        //Pretend commiting changes
+        libraryWork.Stage("added 2 items");
+        libraryWork.Commit();
+
+        try
+        {
+            LibraryItem missing = repo.GetById(345);
+            Console.WriteLine(missing.Describe());
+        }
+        catch (ItemNotFoundException ex)
+        {
+            Log.Error("Lookup failed for id {Id}: {Message}", ex.Id, ex.Message);
+        }
+        catch (LibraryException ex)
+        {
+            Log.Error("Library error: {Message}", ex.Message);
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Non Library error: {Message}", ex.Message);
+        }
+        finally
+        {
+            Console.WriteLine("Hit out finally block - lookup attempt done");
+        }
+
+        Book noCopies = new Book("Count of Montecristo", "Alejandro Dumas", 0);
+
+        try
+        {
+            Borrow(noCopies);
+        }
+        catch (ItemNotAvailableException ex)
+        {
+            Log.Warning("Borrow refused: {Message}", ex.Message);
+        }
+    }
+
+    public static void Borrow(Book book)
+    {
+        if (!book.Checkout())
+        {
+            throw new ItemNotAvailableException(book.Title);
+        }
+    }
 
 }
