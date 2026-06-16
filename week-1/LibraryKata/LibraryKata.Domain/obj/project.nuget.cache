@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "KNH5Olqev5I=",
+  "dgSpecHash": "6o4pkSOMAB4=",
   "success": true,
   "projectFilePath": "C:\\Users\\martr\\Martin-Roque-code\\week-1\\LibraryKata\\LibraryKata.Domain\\Library.Domain.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\martr\\.nuget\\packages\\serilog\\4.3.1\\serilog.4.3.1.nupkg.sha512",
+    "C:\\Users\\martr\\.nuget\\packages\\serilog.sinks.console\\6.1.1\\serilog.sinks.console.6.1.1.nupkg.sha512"
+  ],
   "logs": []
 }
