@@ -1,4 +1,5 @@
 ﻿using LibraryKata.Domain;
+using Serilog;
 
 namespace LibraryKata.App; //Logical container for related code files
 
@@ -7,6 +8,12 @@ public class Program
     //main method
     public static void Main()
     {
+        //Configure Serilog (singleton)
+        Log.Logger = new LoggerConfiguration()
+        .MinimumLevel.Information() // Verbose > Debug > Info > Warning > Error > Fatal
+        .WriteTo.Console() //Sink: where do my logs go?
+        .CreateLogger(); // create logger based on config adove  
+
         DataTypesAndOperatos();
         ControlFlow();
         Loops();
@@ -14,6 +21,8 @@ public class Program
         ClassesExample();
         OopDemo();
         CollectionsDemo();
+
+        Log.CloseAndFlush();
     }
 
     private static void DataTypesAndOperatos()
