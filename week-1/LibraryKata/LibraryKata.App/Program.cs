@@ -199,6 +199,26 @@ public class Program
 
         Console.WriteLine($"Catalog holds {catalog._items.Count}; first is {catalog._items[0].Title}");
 
+        // The other containers, each reached through intent-named methods instead of raw fields:
+        // STACK (LIFO) - return cart: the last book dropped is the first re-shelved.
+        catalog.DropInReturnCart(catalog[0]);
+        catalog.DropInReturnCart(catalog[2]);
+        Console.WriteLine($"Return cart has {catalog.CartCount}; reshelving \"{catalog.Reshelve().Title}\" first");
+
+        // QUEUE (FIFO) - holds line: the first member to ask is the first served.
+        catalog.PlaceHold("Ada");
+        catalog.PlaceHold("Grace");
+        Console.WriteLine($"{catalog.HoldsWaiting} holds waiting; serving {catalog.ServeNextHold()} first");
+
+        // LINKEDLIST - a reading list we reorder; AddNextUp jumps to the front.
+        catalog.AddToReadingList(catalog[0]);
+        catalog.AddNextUp(catalog[1]);
+        Console.WriteLine("Reading list order:");
+        foreach (LibraryItem item in catalog.ReadingList)
+        {
+            Console.WriteLine($"  - {item.Title}");
+        }
+
         ItemKind kind = ItemKind.Magazine;
 
         ShelfLocation whereIs = new ShelfLocation(3, 12);

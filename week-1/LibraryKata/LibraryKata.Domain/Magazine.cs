@@ -12,6 +12,12 @@ public class Magazine : LibraryItem, ILendable
         Publisher = publisher;
     }
 
+    public Magazine(string title, string author, int circulationCopies)
+        : this(title, author, circulationCopies, "Unknown")
+    {
+
+    }
+
     public override string Describe()
     {
         return $"{Title} magazine, published by {Publisher}";
