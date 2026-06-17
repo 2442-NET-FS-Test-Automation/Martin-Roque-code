@@ -22,6 +22,7 @@ public class Program
         OopDemo();
         CollectionsDemo();
         ExceptionsDemo();
+        AdvanceClassesDemo();
 
         Log.CloseAndFlush();
     }
@@ -308,6 +309,36 @@ public class Program
         {
             throw new ItemNotAvailableException(book.Title);
         }
+    }
+
+    public static void AdvanceClassesDemo()
+    {
+        Console.WriteLine("\n == Advanced classes ==");
+
+        Console.WriteLine(GC.GetTotalMemory(forceFullCollection: false) / 1024);
+
+        ILibraryRepository repo = new InMemoryLibraryRepository();
+
+        LibraryItem dune = LibraryItemFactory.Create(ItemKind.Book, "Dune", "Frank Herbert", copies: 3);
+
+        repo.Add(dune);
+
+        repo.Add(LibraryItemFactory.Create(ItemKind.Magazine, "Wired", "Axel", copies: 2));
+        repo.Add(LibraryItemFactory.Create(ItemKind.Book, "Dune Messiah", "Frank Herbert", copies: 2));
+
+        Catalog catalog = new Catalog();
+
+        foreach (LibraryItem item in repo.GetAll())
+        {
+            catalog.Add(item);
+        }
+
+        Console.WriteLine($"We have {catalog.Authors.Count} unique authors in our catalog");
+
+        foreach (string author in catalog.Authors)
+            Console.WriteLine(author);
+
+        List<LibraryItem> byFrankHerbert = catalog.Find(item => item.Author == "Frank Herbert");
     }
 
 }
