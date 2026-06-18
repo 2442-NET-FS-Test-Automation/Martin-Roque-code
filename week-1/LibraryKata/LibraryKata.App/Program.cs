@@ -6,7 +6,7 @@ namespace LibraryKata.App; //Logical container for related code files
 public class Program
 {
     //main method
-    public static void Main()
+    public static async Task Main()
     {
         //Configure Serilog (singleton)
         Log.Logger = new LoggerConfiguration()
@@ -23,6 +23,7 @@ public class Program
         CollectionsDemo();
         ExceptionsDemo();
         AdvanceClassesDemo();
+        await AsyncHttpDemo();
 
         Log.CloseAndFlush();
     }
@@ -348,6 +349,33 @@ public class Program
         {
             Console.WriteLine($"{item.Title}");
         }
+    }
+
+    public static async Task AsyncHttpDemo()
+    {
+        OpenLibraryClient client = new();
+
+        string[] isbns = { "9780132350884", "9780201633610" };
+
+        Task<LibraryItem?>[] fetchedBooks = new Task<LibraryItem?>[isbns.Length];
+
+        for (int i = 0; i < isbns.Length; i++)
+        {
+            fetchedBooks[i] = client.FetchByIsbnAsync(isbns[i]);
+        }
+
+        LibraryItem?[] findBooks = await Task.WhenAll(fetchedBooks);
+
+        LibraryItem? firstFoundBook = findBooks.Length > 0 ? findBooks[0] : null;
+
+        Console.WriteLine($"Fetched: {firstFoundBook?.Describe() ?? "nothing"}  ");
+
+        //Boxing and unboxing replace by generics
+
+        int toBeBoxed = 6;
+        object boxed = toBeBoxed;
+
+        int unBoxed = (int)boxed;
     }
 
 }
