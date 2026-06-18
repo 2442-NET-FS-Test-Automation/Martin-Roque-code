@@ -325,6 +325,7 @@ public class Program
 
         repo.Add(LibraryItemFactory.Create(ItemKind.Magazine, "Wired", "Axel", copies: 2));
         repo.Add(LibraryItemFactory.Create(ItemKind.Book, "Dune Messiah", "Frank Herbert", copies: 2));
+        repo.Add(LibraryItemFactory.Create(ItemKind.ReferenceBook, "C# Language Reference", "Microsoft", 1, section: "Technology"));
 
         Catalog catalog = new Catalog();
 
@@ -339,6 +340,14 @@ public class Program
             Console.WriteLine(author);
 
         List<LibraryItem> byFrankHerbert = catalog.Find(item => item.Author == "Frank Herbert");
+        Console.WriteLine($"There are {byFrankHerbert.Count} books by Frank Herbert");
+
+        Console.WriteLine("We have a mix of lendable and non-lendable items");
+
+        foreach (LibraryItem item in catalog.Lendable())
+        {
+            Console.WriteLine($"{item.Title}");
+        }
     }
 
 }

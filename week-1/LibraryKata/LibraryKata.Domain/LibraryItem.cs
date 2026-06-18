@@ -8,8 +8,8 @@ public abstract class LibraryItem
     // Things about a book we can model - what is the "shape" of a book
     // Because I want to use a no-arg Constructor, its best practice to make 
     // my properties nullable. 
-    public string? Title { get; private set; } // auto property syntax - no writing getters and setters
-    public string? Author { get; private set; }
+    public string Title { get; private set; } // auto property syntax - no writing getters and setters
+    public string Author { get; private set; }
 
     // The same way we can have static methods (belong to the class)
     // we can have static properties/members 
