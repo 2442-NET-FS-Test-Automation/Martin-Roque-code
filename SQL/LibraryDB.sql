@@ -118,17 +118,103 @@ INSERT INTO dbo.Member (FirstName, LastName, Email, JoinedDate) VALUES
 GO
 
 INSERT INTO dbo.Book (Title, ISBN, PublishedYear, CategoryName, AuthorId, TotalCopies, AvailableCopies, Edition) VALUES
-    ('Clean Architecture',                 '9780134494166', 2017, 'Software',            1, 2, 2, 1),
-    ('Refactoring',                        '9780201485677', 1999, 'Software',      2, 2, 1, 2),
-    ('Patterns of Enterprise Application Architecture','9780321127426',2002,'Software', 2, 1, 1, 1),
-    ('Test Driven Development',            '9780321146533', 2002, 'Testing',         3, 2, 2, 1),
-    ('Extreme Programming Explained',      '9780321278654', 2004, 'Process',           3, 1, 0, 2),
-    ('Design Patterns',                    '9780201633610', 1994, 'Software',          4, 2, 2, 1),
-    ('The Pragmatic Programmer',           '9780201616224', 1999, 'Software',           5, 4, 3, 1),
+    ('Clean Architecture',                 '9780134494166', 2017, 'Software',            5, 2, 2, 1),
+    ('Refactoring',                        '9780201485677', 1999, 'Software',      6, 2, 1, 2),
+    ('Patterns of Enterprise Application Architecture','9780321127426',2002,'Software', 6, 1, 1, 1),
+    ('Test Driven Development',            '9780321146533', 2002, 'Testing',         7, 2, 2, 1),
+    ('Extreme Programming Explained',      '9780321278654', 2004, 'Process',           7, 1, 0, 2),
+    ('Design Patterns',                    '9780201633610', 1994, 'Software',          8, 2, 2, 1);
+    /*('The Pragmatic Programmer',           '9780201616224', 1999, 'Software',           5, 4, 3, 1),
     ('The Pragmatic Programmer 20th Anniv','9780135957059', 2019, 'Software',            5, 2, 2, 2),
-    ('Programming Ruby',                   '9780974514055', 2004, 'Languages',           6, 1, 1, 1);
+    ('Programming Ruby',                   '9780974514055', 2004, 'Languages',           6, 1, 1, 1);*/
 GO
+
+INSERT INTO dbo.Loan(BookId, MemberId, DueDate, ReturnDate) VALUES
+    (10,1,'2026-06-30', NULL);
 
 SELECT * FROM dbo.Author;
 SELECT * FROM dbo.Member;
 SELECT * FROM dbo.Book;
+
+UPDATE dbo.Book
+SET Edition = 2
+WHERE BookId = 3;
+
+UPDATE dbo.Book
+SET AvailableCopies = AvailableCopies - 1
+WHERE BookId = 1;
+
+DELETE FROM dbo.Member WHERE Email = 'dennis@example.com';
+
+DELETE FROM dbo.Author WHERE AuthorId = 4;
+
+--DELETE FROM dbo.Author WHERE AuthorId = 6;
+
+GO
+--DQL - SELECT to return data
+SELECT * FROM dbo.Book;
+
+SELECT Title, PublishedYear, AvailableCopies FROM dbo.Book;
+
+SELECT Title, TotalCopies - AvailableCopies AS CopiesOut FROM dbo.Book;
+
+SELECT Title, PublishedYear 
+FROM dbo.Book
+WHERE PublishedYear >= 2000; --Filter
+
+--BETWEEN, LIKE and IS 
+
+-- 1999 and 2004
+SELECT Title
+FROM dbo.Book
+WHERE PublishedYear 
+BETWEEN 1999 AND 2004;
+
+-- software or testing
+SELECT Title, CategoryName
+FROM dbo.Book
+WHERE CategoryName
+IN ('Software', 'Testing'); -- By default, many RDBMS systems are case-insesitive for comparisons
+
+-- Title start with "Clean"
+SELECT Title
+FROM dbo.Book
+WHERE Title
+LIKE 'Test%';
+
+--Title were category is software and available copies greater than 1
+SELECT Title
+FROM dbo.Book
+WHERE CategoryName = 'Software' AND AvailableCopies > 1;
+
+--Title where publishedyear was not provided
+SELECT Title
+FROM dbo.Book
+WHERE PublishedYear IS NULL; --In SQL null is does not equal anything. Absence of value.
+
+-- = matches one exact value.
+-- IN matches any value in the provided list.
+-- LIKE matches some pattern with wildcards %.
+
+-- ORDER BY and DISTINCT
+SELECT Title, PublishedYear 
+FROM dbo.Book
+ORDER BY PublishedYear DESC, Title ASC; --ASC is default
+
+--Using distinct
+-- All categories
+SELECT DISTINCT CategoryName
+FROM dbo.Book
+ORDER BY CategoryName;
+
+--GROUP BY and HAVING - a preview
+--Category name and the count of books in that category where the count is more that 2.
+--Order results by book count descending
+SELECT CategoryName, COUNT(*) AS BookCount -- Aggregate function that counts the rows in each group
+FROM dbo.Book
+GROUP BY CategoryName --Collapses all rows with the same category into one group
+HAVING COUNT(*) > 2 
+ORDER BY BookCount DESC;
+--HAVING vs WHERE
+-- HAVING filters groups in a Group By.
+-- WHERE filters rows.
