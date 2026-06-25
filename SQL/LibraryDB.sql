@@ -357,3 +357,123 @@ INSERT INTO dbo.Loan (BookId, MemberId, LoanDate, DueDate, ReturnDate) VALUES
     (1, 4, '2026-06-10', '2026-06-24', NULL),         -- Clean Code, out to Linus
     (8, 5, '2026-06-12', '2026-06-26', NULL);         -- Pragmatic Programmer, out to Margaret
 GO
+
+--JOINS and intermadiate DQL
+
+-- Aggregate functions
+-- An aggregate collapses many rows into one number
+-- COUNT(), SUM(), AVG() -skips nulls, MIN(), MAX()
+
+SELECT COUNT(*) AS BookCount, SUM(TotalCopies) AS TotalCopies,
+    AVG(TotalCopies) AS AvgCopies, MIN(PublishedYear) AS Oldest,
+    MAX(PublishedYear) AS Newest
+FROM dbo.Book;
+
+--Scalar functions - transform a value into a new value per row.
+
+SELECT UPPER(Lastname) AS LastUpper,
+        LEN(Email) AS EmailLen,
+        CONCAT(FirstName,' ',LastName) AS FullName,
+        DATEDIFF(DAY, JoinedDate, GETDATE()) AS DaysMember
+FROM dbo.Member;
+
+-- SQL Joins --
+-- INNER JOIN, LEFT JOIN and RIGHT JOIN
+-- OUTTER JOINs (LEFT, RIGHT, FULL)
+-- CROSS JOINs
+SELECT b.Title, c.Name AS Category 
+FROM dbo.Book AS b
+INNER JOIN dbo.Category AS c ON c.CategoryId = b.CategoryId --equi-join
+ORDER BY c.Name, b.Title;
+
+-- JOIN across many to many
+
+SELECT b.Title, a.FirstName + ' ' + a.LastName AS Author
+FROM dbo.Book AS b
+JOIN dbo.BookAuthor ba ON ba.BookId = b.BookId
+JOIN dbo.Author a ON a.AuthorId = ba.AuthorId
+Order BY b.Title , Author;
+
+SELECT c.Name AS Categoty, COUNT(*) AS Books, SUM(b.TotalCopies) AS Copies
+FROM dbo.book b
+JOIN dbo.Category c ON c.CategoryId = b.CategoryId
+GROUP BY c.Name
+HAVING COUNT(*) > 0
+ORDER BY Books DESC; 
+
+-- LEFT and RIGHT joins
+SELECT m.FirstName, m.LastName, l.LoanID, l.DueDate
+FROM dbo.Member AS m
+LEFT JOIN dbo.Loan AS l ON l.MemberId = m.MemberId
+ORDER BY m.LastName;
+
+SELECT m.FirstName, m.LastName
+FROM dbo.Member AS m
+LEFT JOIN dbo.Loan AS l ON l.MemberId = m.MemberId
+WHERE l.LoanId IS NULL;
+
+--RIGHT JOIN
+SELECT b.Title, l.LoanID
+FROM dbo.Loan AS l
+RIGHT JOIN dbo.Book AS b ON b.BookId = l.BookId
+ORDER BY b.Title;
+
+--FULL OUTER vs CROSS
+-- FULL OUTER JOIN - Returns matched rows where they exist as weill as unmatched rows
+SELECT b.Title, c.Name AS Category
+FROM dbo.Book AS b
+FULL OUTER JOIN dbo.Category As c ON c.CategoryId = b.CategoryId
+ORDER BY c.Name;
+
+-- CROSS JOIN - not common. Cartesian product
+-- Every possible combination of the rows in both tables
+SELECT a.LastName, c.Name
+FROM dbo.Author AS a
+CROSS JOIN dbo.Category AS c;
+
+-- Subqueries
+-- A subquery is a query inside another query
+--scalar subquery: books that have more copies than average
+SELECT Title, TotalCopies
+FROM dbo.Book
+WHERE TotalCopies > (SELECT AVG(TotalCopies) FROM dbo.Book);
+
+--IN-Subquery
+SELECT FirstName, LastName
+FROM dbo.Member
+WHERE MemberId IN
+(
+    SELECT MemberId
+    FROM dbo.Loan
+    WHERE ReturnDate IS NULL
+);
+
+--correlated subquery: can cause issues
+SELECT Title, TotalCopies
+FROM dbo.Book b1
+WHERE TotalCopies > (
+    SELECT AVG(TotalCopies)
+    FROM dbo.Book b2
+    WHERE b1.PublishedYear = b2.PublishedYear
+);
+
+--correlated subquery: loan count per book - computed by row
+SELECT b.Title,
+    (SELECT COUNT(*) FROM dbo.Loan l WHERE l.BookId = b.BookId) AS TimesLoaned
+FROM dbo.Book b
+ORDER BY TimesLoaned DESC;
+
+-- Lets make a dashboard
+-- I want every currently out loan (loans with a null), with member, book, category and how late the book is
+
+SELECT m.FirstName + ' ' + m.LastName AS Member,
+        b.Title,
+        c.Name AS Category,
+        l.DueDate,
+        DATEDIFF(Day, l.DueDate, GETDATE()) AS DaysOverdue
+FROM dbo.Loan AS l
+JOIN dbo.Member AS m ON m.MemberId = l.MemberId
+JOIN dbo.Book AS b ON b.BookId = l.BookId
+JOIN dbo.Category AS c ON c.CategoryId = b.CategoryId
+WHERE l.ReturnDate IS NULL
+ORDER BY DaysOverdue DESC;
