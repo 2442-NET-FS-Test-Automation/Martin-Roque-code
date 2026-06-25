@@ -121,7 +121,7 @@ GROUP BY t.Name
 ORDER BY Total DESC;
 
 -- Show the top three best selling artists.
-SELECT TOP 3 ar.Name AS ArtistName , SUM(il.Quantity*il.UnitPrice) AS TotalRevenue
+SELECT TOP 3 ar.Name AS ArtistName , SUM(il.Quantity) AS TotalRevenue
 FROM dbo.Artist AS ar
 JOIN dbo.Album AS al ON ar.ArtistId = al.ArtistId
 JOIN dbo.Track AS t ON al.AlbumId = t.AlbumId
@@ -167,13 +167,33 @@ GROUP BY c.FirstName, c.LastName, i.Total
 ORDER BY i.Total DESC;
 
 -- Return the email and full name of of all customers who listen to Rock.
-
+SELECT c.FirstName + ' ' + c.LastName AS FullName, c.Email
+FROM dbo.Customer AS c
+JOIN dbo.Invoice AS i ON i.CustomerId = c.CustomerId
+JOIN dbo.InvoiceLine AS il ON il.InvoiceId = i.InvoiceId
+JOIN dbo.Track AS t ON t.TrackId = il.TrackId
+JOIN dbo.Genre AS g ON g.GenreId = g.GenreId
+WHERE g.Name = 'Rock'
+GROUP BY c.FirstName, c.LastName, c.Email;
 
 -- Which artist has written the most Rock songs?
+SELECT TOP 1 ar.Name 
+FROM dbo.Track AS t
+JOIN dbo.Album AS al ON al.AlbumId = t.AlbumId
+JOIN dbo.Artist AS ar ON al.ArtistId = ar.ArtistId
+JOIN dbo.Genre AS g ON g.GenreId = t.GenreId
+WHERE g.Name = 'Rock'
+GROUP BY ar.Name;
 
 
 -- Which artist has generated the most revenue?
-
+SELECT TOP 1 ar.Name AS ArtistName , SUM(il.Quantity*il.UnitPrice) AS TotalRevenue
+FROM dbo.Artist AS ar
+JOIN dbo.Album AS al ON ar.ArtistId = al.ArtistId
+JOIN dbo.Track AS t ON al.AlbumId = t.AlbumId
+JOIN dbo.InvoiceLine AS il ON t.TrackId = il.TrackId
+GROUP BY ar.Name
+ORDER BY TotalRevenue DESC;
 
 
 
