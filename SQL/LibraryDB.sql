@@ -477,3 +477,114 @@ JOIN dbo.Book AS b ON b.BookId = l.BookId
 JOIN dbo.Category AS c ON c.CategoryId = b.CategoryId
 WHERE l.ReturnDate IS NULL
 ORDER BY DaysOverdue DESC;
+
+-- Transactions - ALL of this runs or NONE of it succeeds
+-- SQL has TRY and CATCH
+SET XACT_ABORT ON; -- SQL Server specific flag
+
+BEGIN TRY
+    BEGIN TRANSACTION
+        INSERT INTO dbo.Loan(BookId, MemberId, DueDate)
+        VALUES(6,2,DATEADD(DAY, 14, GETDATE()))
+
+        UPDATE dbo.Book SET AvailableCopies = AvailableCopies - 1 WHERE BookId = 6;
+    COMMIT TRANSACTION
+    PRINT 'Checkout COMMITED'
+END TRY
+BEGIN CATCH
+    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION
+    PRINT 'Checkout ROLLED BACK: ' + ERROR_MESSAGE();
+END CATCH
+
+-- Isolation levels - largely managed by the RDBMS but we have some options
+-- In SQL Server we have four options
+-- READ UNCOMMITTED - Queries and statements can read data rows modified by other transactions thar are to be committed (dirty and phantom reads)
+-- READ COMMITTED - (Default) - Prevents dirty reads by requering that data read by a statement must be committed before it is processed
+-- REPETEABLE READ - Places shared locks on all data read by transtaction and HOLDS THEM until the entire transactions ends
+-- SERIALIZABLE - Most restrictive. Places locks on rows that prevent other transactions from updating, deleting or inserting until transaction ends
+UPDATE dbo.Book SET AvailableCopies = 0 WHERE BookId = 6;
+
+-- Add constraint
+ALTER TABLE dbo.Book
+ADD CONSTRAINT CK_Book_Min_AvailableCopies
+CHECK (AvailableCopies >= 0);
+
+-- Views, Indexes, Stored Procedures and more.
+-- Views are like saved queries, can query it as a table
+GO
+CREATE OR ALTER VIEW dbo.vw_ActiveLoans 
+AS 
+SELECT m.FirstName + ' ' + m.LastName AS Member,
+        b.Title,
+        c.Name AS Category,
+        l.DueDate,
+        DATEDIFF(Day, l.DueDate, GETDATE()) AS DaysOverdue
+FROM dbo.Loan AS l
+JOIN dbo.Member AS m ON m.MemberId = l.MemberId
+JOIN dbo.Book AS b ON b.BookId = l.BookId
+JOIN dbo.Category AS c ON c.CategoryId = b.CategoryId
+WHERE l.ReturnDate IS NULL;
+
+GO
+
+SELECT * FROM dbo.vw_ActiveLoans ORDER BY DueDate;
+
+-- Increasing in complexity and potential usefulness
+-- Store Procedures
+
+GO
+CREATE OR ALTER PROCEDURE dbo.usp_CheckoutBook
+    @BookId INT,
+    @MemberId INT,
+    @Days INT = 14
+
+AS
+BEGIN
+    SET XACT_ABORT ON;
+    SET NOCOUNT ON; -- turns off the "x rows affected" message print
+    BEGIN TRY
+        BEGIN TRANSACTION
+            IF (SELECT AvailableCopies FROM dbo.Book WHERE BookId = @BookId) <= 0
+                THROW 5000, 'No copies available to check out.', 1;
+            
+            INSERT INTO dbo.Loan(BookId, MemberId, DueDate)
+            VALUES(@BookId,@MemberId, DATEADD(DAY, @Days,GETDATE()));
+
+            UPDATE dbo.Book SET AvailableCopies = AvailableCopies - 1 WHERE BookId = @BookId;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+        THROW; --bubbling up the Try block error to whererver my stored procedure was called
+    END CATCH
+END;
+
+GO
+
+EXEC dbo.usp_CheckoutBook @BookId = 1, @MemberId = 3, @Days = 21;
+
+SELECT * FROM dbo.Loan WHERE BookId = 1 AND MemberId = 3;
+GO
+
+-- Stored Procedure vs User Defined Function
+-- A Stored Procedure Does Something, called by EXEC
+-- A function computes a value, called inside the query
+
+-- User Defined Function
+CREATE OR ALTER FUNCTION dbo.fn_DaysOverdue (@dueDate DATE)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @days INT = DATEDIFF(DAY, @dueDate, CAST(GETDATE() AS DATE)); 
+    RETURN CASE WHEN @days > 0 THEN @days ELSE 0 END;
+END;
+GO
+
+SELECT b.Title, l.DueDate, dbo.fn_DaysOverdue(DueDate) AS DaysOverdue
+FROM dbo.Loan l
+JOIN dbo.Book b ON b.BookId = l.BookId
+WHERE ReturnDate is NULL;
+
+-- Indexes - a lookup structure like a index in a book
+CREATE INDEX IX_Loan_MemberId ON dbo.Loan (MemberId);
