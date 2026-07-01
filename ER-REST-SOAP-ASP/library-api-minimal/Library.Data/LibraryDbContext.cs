@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Library.Data;
 using Library.Data.Entities;
+using System.Dynamic;
+using Microsoft.Identity.Client;
 
 namespace Library.Data;
 
@@ -10,6 +12,10 @@ public class LibraryDbContext : DbContext
 
     public DbSet<Product> Products => Set<Product>();
     public DbSet<InventoryItem> Inventory => Set<InventoryItem>();
+    public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OrderLine> OrderLines => Set<OrderLine>();
+    public DbSet<FulfillmentEvent> FulfillmentEvents { get; set; }
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -26,6 +32,11 @@ public class LibraryDbContext : DbContext
                     .HasForeignKey<InventoryItem>(i => i.ProductId);
         });
 
+        b.Entity<InventoryItem>().Property(i => i.RowVersion).IsRowVersion();
+
+        b.Entity<Customer>().Property(c => c.Email).HasMaxLength(256);
+        b.Entity<Customer>().HasIndex(c => c.Email).IsUnique();
+
         b.Entity<Product>().HasData(
             new Product { Id = 1, Sku = "BK-001", Name = "Clean Code", Price = 32.00m },
             new Product { Id = 2, Sku = "BK-002", Name = "The Pragmatic Programmer", Price = 38.00m },
@@ -36,6 +47,10 @@ public class LibraryDbContext : DbContext
             new InventoryItem { Id = 1, ProductId = 1, CurrentStock = 5 },
             new InventoryItem { Id = 2, ProductId = 2, CurrentStock = 3 },
             new InventoryItem { Id = 3, ProductId = 3, CurrentStock = 8 }
+        );
+        b.Entity<Customer>().HasData(
+            new Customer { Id = 1, Name = "Ada Lovelance", Email = "ada@exaple.com" },
+            new Customer { Id = 2, Name = "Alan Turing ", Email = "alan@example.com" }
         );
     }
 }
