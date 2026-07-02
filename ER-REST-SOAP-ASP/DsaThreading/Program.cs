@@ -4,9 +4,9 @@ using DsaThreading;
 
 Console.WriteLine("Hello, World!");
 
-ThreadingDemo();
+await ThreadingDemo();
 
-static void ThreadingDemo()
+static async Task ThreadingDemo()
 {
     //How C# manages Threads (OS Threads), are an object, managed by the runtime behind scenes
     Console.WriteLine($"Main runs on thread #{Environment.CurrentManagedThreadId}");
@@ -151,5 +151,80 @@ static void ThreadingDemo()
         var bank = new Bank();
         Parallel.For(0, 100000, _ => bank.DepositSafe(1));
         Console.WriteLine($"SAFE balance = {bank.Balance} (expected 100000)");
+    }
+
+    InterLockedDemo();
+
+    static void InterLockedDemo()
+    {
+        long counter = 0;
+        //Interlock - faster that a lock when doing single atomic operations
+        Parallel.For(0, 100000, _ => Interlocked.Increment(ref counter));
+        Console.WriteLine($"Interlocked = {counter} (expected 100000)");
+    }
+
+    //Deadlocks and Starvation
+
+    //Deadlock - If two tasks create locks on resources the other ends up needing they can deadlock.
+    //In this case waiting forever
+
+
+    //Starvation - A thread blocked by another thread work, stays alive but cannot progress.
+
+    CancellationDemo();
+
+    static void CancellationDemo()
+    {
+        //Calling for a CancellationToken
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+
+        CancellationToken token = cts.Token;
+
+        var work = Task.Run(() =>
+        {
+            for (long i = 0; ; i++)
+            {
+                token.ThrowIfCancellationRequested();
+                if (i % 500000 == 0) { /*some work*/}
+            }
+        }, token);
+
+        try
+        {
+            work.Wait();
+        }
+        catch (AggregateException ex) when (ex.InnerException is OperationCanceledException)
+        {
+            Console.WriteLine("Work was cancelled cooperatively");
+        }
+        catch (AggregateException ex) when (ex.InnerException is InvalidOperationException)
+        {
+            Console.WriteLine("Why are you here!?");
+        }
+    }
+
+    ExceptionDemo();
+
+    static void ExceptionDemo()
+    {
+        var t = Task.Run(() => throw new InvalidOperationException("oopsie"));
+
+        try
+        {
+            t.Wait();
+        }
+        catch (AggregateException ex)
+        {
+            Console.WriteLine($"Caught: {ex.InnerException!.Message}");
+        }
+    }
+
+    await AsyncDemo();
+
+    static async Task AsyncDemo()
+    {
+        Console.WriteLine($"Before await on thread #{Environment.CurrentManagedThreadId}");
+        await Task.Delay(50);
+        Console.WriteLine($"After await on thread #{Environment.CurrentManagedThreadId}");
     }
 }
