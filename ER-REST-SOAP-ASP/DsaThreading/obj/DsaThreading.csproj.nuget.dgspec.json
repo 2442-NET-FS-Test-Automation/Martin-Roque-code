@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\martr\\Martin-Roque-code\\DSA-DEMO\\DsaThreading\\DsaThreading.csproj": {}
+    "C:\\Users\\martr\\Martin-Roque-code\\ER-REST-SOAP-ASP\\DsaThreading\\DsaThreading.csproj": {}
   },
   "projects": {
-    "C:\\Users\\martr\\Martin-Roque-code\\DSA-DEMO\\DsaThreading\\DsaThreading.csproj": {
+    "C:\\Users\\martr\\Martin-Roque-code\\ER-REST-SOAP-ASP\\DsaThreading\\DsaThreading.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\martr\\Martin-Roque-code\\DSA-DEMO\\DsaThreading\\DsaThreading.csproj",
+        "projectUniqueName": "C:\\Users\\martr\\Martin-Roque-code\\ER-REST-SOAP-ASP\\DsaThreading\\DsaThreading.csproj",
         "projectName": "DsaThreading",
-        "projectPath": "C:\\Users\\martr\\Martin-Roque-code\\DSA-DEMO\\DsaThreading\\DsaThreading.csproj",
+        "projectPath": "C:\\Users\\martr\\Martin-Roque-code\\ER-REST-SOAP-ASP\\DsaThreading\\DsaThreading.csproj",
         "packagesPath": "C:\\Users\\martr\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\martr\\Martin-Roque-code\\DSA-DEMO\\DsaThreading\\obj\\",
+        "outputPath": "C:\\Users\\martr\\Martin-Roque-code\\ER-REST-SOAP-ASP\\DsaThreading\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\martr\\AppData\\Roaming\\NuGet\\NuGet.Config"
