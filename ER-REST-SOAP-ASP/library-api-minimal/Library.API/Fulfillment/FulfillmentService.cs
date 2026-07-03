@@ -1,0 +1,125 @@
+//This class will hold the business logic/db retry logic for fulfilling transactions
+using Library.Data;
+using Library.Data.Entities;
+using Microsoft.EntityFrameworkCore;
+using Serilog;
+
+namespace Library.API.Fulfillment;
+
+//ASP.NET's builder Needs us to provide 2 things when we register a service. These can both go in the same file
+
+public interface IFulfillmentService
+{
+    public Task<FulfillmentResult> FulfillOneAsync(int orderId, CancellationToken ct);
+}
+
+public enum FulfillmentResult { Fulfilled, Backordered }
+
+//recors are lightweight custom types that allow for comparison with ==
+public record BurstResult(int Fulfilled, int Backordered);
+
+public class FulfillmentService : IFulfillmentService
+{
+    private readonly IDbContextFactory<LibraryDbContext> _factory;
+
+    public FulfillmentService(IDbContextFactory<LibraryDbContext> factory)
+    {
+        _factory = factory;
+    }
+
+    //Method to handle fulfillment
+    public async Task<FulfillmentResult> FulfillOneAsync(int orderId, CancellationToken ct)
+    {
+        //First - we need a dbcontext
+        await using var db = await _factory.CreateDbContextAsync(ct);
+
+        var order = await db.Orders.Include(o => o.Lines).FirstAsync(o => o.Id == orderId, ct);
+
+        //Create dictionary with the ProductId Key and orderId Value
+        var requested = order.Lines.ToDictionary(l => l.ProductId, l => l.OrderId);
+        //flag for "can i continue fulfilling this order"
+        bool canFulfill = true;
+
+        foreach (OrderLine line in order.Lines)
+        {
+            InventoryItem inv = await db.Inventory.FirstAsync(i => i.ProductId == line.ProductId, ct);
+
+            if (inv.CurrentStock < line.Quantity)
+            {
+                canFulfill = false;
+                break;
+            }
+
+            inv.CurrentStock -= line.Quantity;
+        }
+
+        if (!canFulfill)
+        {
+            order.Status = Status.Backordered;
+
+            db.FulfillmentEvents.Add(new FulfillmentEvent { OrderId = orderId, Type = "Backorder" });
+
+            await db.SaveChangesAsync(ct);
+
+            Log.Warning("Backordered {OrderId}: insufficient stock", orderId);
+
+            return FulfillmentResult.Backordered;
+        }
+
+        order.Status = Status.Fulfilled;
+        order.CompletedUtc = DateTime.UtcNow;
+        db.FulfillmentEvents.Add(new FulfillmentEvent { OrderId = orderId, Type = "Fulfilled" });
+
+        //Adding our retry save method
+        if (!await SaveWithRetryAsync(db, requested, ct))
+        {
+            db.ChangeTracker.Clear();
+            Order staleOrder = await db.Orders.FirstAsync(o => o.Id == orderId, ct);
+            staleOrder.Status = Status.Backordered;
+            Log.Warning("Backordered order {OrderId} after concurrency retry", orderId);
+            return FulfillmentResult.Backordered;
+        }
+
+        Log.Information("Fulfilled order: {OrderId}, {LineCount} lines", orderId, order.Lines.Count);
+
+        return FulfillmentResult.Fulfilled;
+    }
+
+    //Lets break the logic for savin with retry (via RowVersion) into its own row version
+
+    public static async Task<bool> SaveWithRetryAsync(
+        LibraryDbContext db, IReadOnlyDictionary<int, int> requestedByProductId, CancellationToken ct)
+    {
+        for (int attempt = 0; ; attempt++)
+        {
+            try
+            {
+                await db.SaveChangesAsync(ct);
+                return true;
+            }
+            catch (DbUpdateConcurrencyException ex) when (attempt < 3) //How many times to handle the exception for us, +3 ww won't enter the catch
+            {
+                foreach (var entry in ex.Entries)
+                {
+                    var current = await entry.GetDatabaseValuesAsync();
+
+                    if (current is null) return false;
+
+                    entry.OriginalValues.SetValues(current);
+
+                    if (entry.Entity is InventoryItem inv)
+                    {
+                        int freshValue = current.GetValue<int>(nameof(InventoryItem.CurrentStock));
+                        //Dictionary lookup against the dict we passed in
+                        int desiredAmount = requestedByProductId[inv.ProductId];
+
+                        //Re-check on the refresh stock - don't blindly trust it
+                        if (freshValue < desiredAmount) return false;
+                        inv.CurrentStock = freshValue - desiredAmount;
+                    }
+                }
+            }
+        }
+
+    }
+}
