@@ -42,6 +42,7 @@ public class Seeder : ISeeder
 
             db.Orders.Add(order);
             db.SaveChanges();
+            ids.Add(order.Id);
         }
         return ids;
     }

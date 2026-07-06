@@ -195,16 +195,17 @@ app.MapPost("/orders/burst", (int n, bool expedited, ISeeder seeder,
 
 app.MapGet("/verify/no-oversell", (LibraryDbContext db) =>
 {
-    var rows = db.Inventory.Include(i => i.Product).ToList(); //grab inventory rows
-    var negative = rows.Where(i => i.CurrentStock < 0); // grab items with negative stock
-    var fulfilled = db.FulfillmentEvents.Count(e => e.Type == "Fulfilled"); //count the fulfilled orders
+    var rows = db.Inventory.Include(i => i.Product).ToList(); // grab Inventory rows, include the product objects as well
+    var negative = rows.Where(i => i.CurrentStock < 0).ToList(); //grab items with negative stock
+    var fulfilled = db.FulfillmentEvents.Count(e => e.Type == "Fulfilled"); // count the fulfilled orders
 
     return new
     {
-        anyNegatice = negative.Any(),
-        onHand = rows.Select(i => new { i.Product, i.CurrentStock }),
+        anyNegative = negative.Any(),
+        onHand = rows.Select(i => new { i.ProductId, i.CurrentStock }),
         unitsFulfilled = fulfilled
     };
+
 });
 
 //Where file ends
