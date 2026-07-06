@@ -23,10 +23,12 @@ public record BurstResult(int Fulfilled, int Backordered);
 public class FulfillmentService : IFulfillmentService
 {
     private readonly IDbContextFactory<LibraryDbContext> _factory;
+    private readonly BurstPlanner _planner;
 
-    public FulfillmentService(IDbContextFactory<LibraryDbContext> factory)
+    public FulfillmentService(IDbContextFactory<LibraryDbContext> factory, BurstPlanner planner)
     {
         _factory = factory;
+        _planner = planner;
     }
 
     //Method to handle fulfillment
@@ -38,7 +40,7 @@ public class FulfillmentService : IFulfillmentService
         var order = await db.Orders.Include(o => o.Lines).FirstAsync(o => o.Id == orderId, ct);
 
         //Create dictionary with the ProductId Key and orderId Value
-        var requested = order.Lines.ToDictionary(l => l.ProductId, l => l.OrderId);
+        var requested = order.Lines.ToDictionary(l => l.ProductId, l => l.Quantity);
         //flag for "can i continue fulfilling this order"
         bool canFulfill = true;
 
@@ -92,14 +94,15 @@ public class FulfillmentService : IFulfillmentService
     public static async Task<bool> SaveWithRetryAsync(
         LibraryDbContext db, IReadOnlyDictionary<int, int> requestedByProductId, CancellationToken ct)
     {
-        for (int attempt = 0; ; attempt++)
+        //Loop forever until we run out of stock
+        while (true)
         {
             try
             {
                 await db.SaveChangesAsync(ct);
                 return true;
             }
-            catch (DbUpdateConcurrencyException ex) when (attempt < 3) //How many times to handle the exception for us, +3 ww won't enter the catch
+            catch (DbUpdateConcurrencyException ex) //How many times to handle the exception for us, +3 ww won't enter the catch
             {
                 foreach (var entry in ex.Entries)
                 {
@@ -116,7 +119,7 @@ public class FulfillmentService : IFulfillmentService
                         int desiredAmount = requestedByProductId[inv.ProductId];
 
                         //Re-check on the refresh stock - don't blindly trust it
-                        if (freshValue < desiredAmount) return false;
+                        if (freshValue < desiredAmount) return false; //this is now our exit condition
                         inv.CurrentStock = freshValue - desiredAmount;
                     }
                 }
@@ -128,7 +131,18 @@ public class FulfillmentService : IFulfillmentService
     public async Task<BurstResult> FulFillBurstAsync(IEnumerable<int> orderIds, CancellationToken ct)
     {
         // we are just going to piggyback off of FulfillOneAsync - call it again
-        var tasks = orderIds.Select(id => FulfillOneAsync(id, ct)); //each call will get its own dbContext
+        List<int> idList = orderIds.ToList();
+
+        List<Order> orders;
+
+        await using (var db = await _factory.CreateDbContextAsync(ct))
+        {
+            orders = await db.Orders.Where(o => idList.Contains(o.Id)).ToListAsync();
+        }
+
+        var planned = _planner.OrderByPriority(orders);
+
+        var tasks = planned.Select(id => FulfillOneAsync(id, ct)); //each call will get its own dbContext
 
         //Await here until all tasks in the collection are complete
         var results = await Task.WhenAll(tasks);

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Library.API.Fulfillment;
 using Microsoft.OpenApi;
 using Microsoft.Data.SqlClient;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,7 @@ builder.Services.AddDbContextFactory<LibraryDbContext>(options => options.UseSql
 
 builder.Services.AddScoped<IFulfillmentService, FulfillmentService>();
 builder.Services.AddScoped<ISeeder, Seeder>();
+builder.Services.AddScoped<BurstPlanner>(); // adding our BurstPlanner, will be used in FulfillmentService
 
 //Swagger added to builder
 builder.Services.AddEndpointsApiExplorer();
@@ -206,6 +208,58 @@ app.MapGet("/verify/no-oversell", (LibraryDbContext db) =>
         unitsFulfilled = fulfilled
     };
 
+});
+
+// Completation report -- what orders got completed and when
+app.MapGet("/reports/by-completation", (LibraryDbContext db) =>
+{
+    return db.Orders
+            .Where(o => o.Status == Status.Fulfilled)
+            .OrderBy(o => o.CompletedUtc)
+            .Select(o => new { o.Id, o.Priority, o.CompletedUtc })
+            .ToList();
+});
+
+app.MapPost("/benchmark", async (int n, IFulfillmentService fs, ISeeder seeder, CancellationToken ct) =>
+{
+    //Lets see how sequential vs parallel runs compare . with mixed orders
+    var ids1 = seeder.ResetAndCreateOrders(n);
+
+    //First, sequential
+    var sw1 = Stopwatch.StartNew();
+
+    foreach (var id in ids1)
+    {
+        await fs.FulfillOneAsync(id, ct);
+    }
+
+    sw1.Stop();
+
+    //Next concurrent
+    var ids2 = seeder.ResetAndCreateOrders(n);
+
+    var sw2 = Stopwatch.StartNew();
+    await fs.FulFillBurstAsync(ids2, ct);
+    sw2.Stop();
+
+    return new
+    {
+        sequentialMs = sw1.ElapsedMilliseconds,
+        concurrentMs = sw2.ElapsedMilliseconds
+    };
+});
+
+app.MapGet("/report/top-products", (LibraryDbContext db) =>
+{
+    var ranked = db.FulfillmentEvents
+        .Where(e => e.Type == "Fulfilled")
+        .Join(db.OrderLines, e => e.OrderId, l => l.OrderId, (e, l) => l)
+        .GroupBy(l => l.ProductId)
+        .Select(g => new { ProductId = g.Key, Units = g.Sum(l => l.Quantity) })
+        .OrderByDescending(x => x.Units)
+        .ToList();
+
+    return ranked;
 });
 
 //Where file ends
