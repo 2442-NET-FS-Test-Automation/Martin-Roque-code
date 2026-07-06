@@ -1,4 +1,0 @@
-<Solution>
-  <Project Path="TicketSystem.Api/TicketSystem.Api.csproj" />
-  <Project Path="TicketSystem.Data/TicketSystem.Data.csproj" />
-</Solution>

@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/Fulfillment.Api/">
+    <Project Path="Fulfillment.Api/Fulfillment.API.csproj" />
+  </Folder>
+  <Project Path="Fulfillment.Data/Fulfillment.Data.csproj" />
+</Solution>
