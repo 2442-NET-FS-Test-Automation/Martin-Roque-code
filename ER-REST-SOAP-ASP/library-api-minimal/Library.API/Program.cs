@@ -4,6 +4,8 @@ using Library.Data.Entities;
 using Serilog;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Library.API.Fulfillment;
+using Microsoft.OpenApi;
+using Microsoft.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,7 @@ builder.Services.AddDbContext<LibraryDbContext>(options => options.UseSqlServer(
 builder.Services.AddDbContextFactory<LibraryDbContext>(options => options.UseSqlServer(conn_string));
 
 builder.Services.AddScoped<IFulfillmentService, FulfillmentService>();
+builder.Services.AddScoped<ISeeder, Seeder>();
 
 //Swagger added to builder
 builder.Services.AddEndpointsApiExplorer();
@@ -166,6 +169,42 @@ app.MapPost("/orders", async (OrderPayLoad orderRequest, IDbContextFactory<Libra
 
     FulfillmentResult result = await fSvc.FulfillOneAsync(newOrder.Id, ct);
     return Results.Ok(new { orderId = newOrder.Id, result = result.ToString() });
+});
+
+//Burst endpoint
+app.MapPost("/orders/burst", (int n, bool expedited, ISeeder seeder,
+    IServiceScopeFactory scopes, IHostApplicationLifetime lifetime) =>
+{
+    var ids = seeder.SeedOrders(n, expedited);
+    var appStopping = lifetime.ApplicationStopping; // gives us a cancellation token that is called when the app goes to shutdown
+
+    _ = Task.Run(async () =>
+    {
+        try
+        {
+            using var scope = scopes.CreateScope();
+            var service = scope.ServiceProvider.GetRequiredService<IFulfillmentService>();
+            await service.FulFillBurstAsync(ids, appStopping);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Burst fulfillment failed");
+        }
+    }, appStopping);
+});
+
+app.MapGet("/verify/no-oversell", (LibraryDbContext db) =>
+{
+    var rows = db.Inventory.Include(i => i.Product).ToList(); //grab inventory rows
+    var negative = rows.Where(i => i.CurrentStock < 0); // grab items with negative stock
+    var fulfilled = db.FulfillmentEvents.Count(e => e.Type == "Fulfilled"); //count the fulfilled orders
+
+    return new
+    {
+        anyNegatice = negative.Any(),
+        onHand = rows.Select(i => new { i.Product, i.CurrentStock }),
+        unitsFulfilled = fulfilled
+    };
 });
 
 //Where file ends

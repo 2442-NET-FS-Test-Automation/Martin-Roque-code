@@ -1,4 +1,5 @@
 //This class will hold the business logic/db retry logic for fulfilling transactions
+using System.Collections;
 using Library.Data;
 using Library.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ namespace Library.API.Fulfillment;
 public interface IFulfillmentService
 {
     public Task<FulfillmentResult> FulfillOneAsync(int orderId, CancellationToken ct);
+    public Task<BurstResult> FulFillBurstAsync(IEnumerable<int> orderIds, CancellationToken ct);
 }
 
 public enum FulfillmentResult { Fulfilled, Backordered }
@@ -121,5 +123,19 @@ public class FulfillmentService : IFulfillmentService
             }
         }
 
+    }
+
+    public async Task<BurstResult> FulFillBurstAsync(IEnumerable<int> orderIds, CancellationToken ct)
+    {
+        // we are just going to piggyback off of FulfillOneAsync - call it again
+        var tasks = orderIds.Select(id => FulfillOneAsync(id, ct)); //each call will get its own dbContext
+
+        //Await here until all tasks in the collection are complete
+        var results = await Task.WhenAll(tasks);
+
+        return new BurstResult(
+            Fulfilled: results.Count(r => r == FulfillmentResult.Fulfilled),
+            Backordered: results.Count(r => r == FulfillmentResult.Backordered)
+        );
     }
 }
