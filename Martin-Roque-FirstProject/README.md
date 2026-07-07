@@ -2,6 +2,15 @@
 #### Videogame Store.
 
 ## Endpoint Map
+#### /inventory - Show all inventory items
+#### /videogames - Show all videogames stored (to now what I am selling)
+#### /inventory/seed - Restock inventory
+#### /buyings/burst - Calling a burst of buyings
+#### /benchmark - comparing sequential with concurrent
+#### /reports/by-fulfillment - how many buyings were fulfilled
+#### /reports/top-videogames - how many videogames are in buyinglines
+#### /reports/top-customers - which customer bought more games
+#### /verify/no-oversell - confirm the program do not oversell any videogame in the buyings
 
 ## Big-O
 #### The algorithm for priority queue is O(n log n) because both of the parts increase in that way with the buying's total.
@@ -18,9 +27,9 @@
 #### Status and Priority (Buying): easier to filter in endpoints.
 
 ## Benchmark time
+#### Sequential:
 #### Concurrency:
-#### Parallelism:
-#### Conclusion:
+#### Conclusion: Concurrency is better when more and more orders are comming
 
 ## Status codes
 #### 200: to notify user about it action was done

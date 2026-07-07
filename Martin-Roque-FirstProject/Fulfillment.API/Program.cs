@@ -81,7 +81,7 @@ app.MapPost("/inventory/seed", (VideoGameStoreDbContext db, ILogger<Program> log
 
 });
 
-app.MapPost("/orders/burst", (int n, bool expedited, ISeeder seeder,
+app.MapPost("/buyings/burst", (int n, bool expedited, ISeeder seeder,
     IServiceScopeFactory scopes, IHostApplicationLifetime lifetime) =>
 {
     var ids = seeder.SeedBuyings(n, expedited);
