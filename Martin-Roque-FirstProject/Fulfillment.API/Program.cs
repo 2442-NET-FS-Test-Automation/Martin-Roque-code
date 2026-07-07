@@ -1,5 +1,6 @@
 using VideoGameStore.Data;
 using VideoGameStore.Data.Entities;
+using VideoGameStore.API.Fulfillment;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -20,6 +21,10 @@ builder.Services.AddDbContext<VideoGameStoreDbContext>(options => options.UseSql
     ServiceLifetime.Scoped, ServiceLifetime.Singleton);
 
 builder.Services.AddDbContextFactory<VideoGameStoreDbContext>(options => options.UseSqlServer(conn_string));
+
+builder.Services.AddScoped<IFulfillmentService, FulfillmentService>();
+builder.Services.AddScoped<ISeeder, Seeder>();
+builder.Services.AddScoped<BurstPlanner>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
