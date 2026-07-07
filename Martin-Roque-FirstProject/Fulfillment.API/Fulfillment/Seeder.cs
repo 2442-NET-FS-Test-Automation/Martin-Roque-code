@@ -33,7 +33,7 @@ public class Seeder : ISeeder
             {
                 CustomerId = Random.Shared.Next(1, 3),
                 Priority = expedited ? Priority.Expedited : Priority.Normal,
-                Lines = new BuyingLine { GameId = vid[specialIds[i % specialIds.Length]], Quantity = 1 }
+                Lines = { new BuyingLine { GameId = vid[specialIds[i % specialIds.Length]], Quantity = 1 } }
             };
 
             db.Buyings.Add(buying);
@@ -80,7 +80,7 @@ public class Seeder : ISeeder
             {
                 CustomerId = Random.Shared.Next(1, 3),
                 Priority = i % 3 == 0 ? Priority.Expedited : Priority.Normal,
-                Lines = new BuyingLine { GameId = vid[new[] { "VGM-001", "VGM-002", "VGM-003", "VGM-004" }[i % 3]], Quantity = 1 }
+                Lines = { new BuyingLine { GameId = vid[new[] { "VGM-001", "VGM-002", "VGM-003", "VGM-004" }[i % 3]], Quantity = 1 } }
             };
 
             db.Buyings.Add(buying);

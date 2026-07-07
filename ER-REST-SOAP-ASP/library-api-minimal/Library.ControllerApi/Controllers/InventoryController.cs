@@ -43,16 +43,16 @@ public class InventoryController : ControllerBase
     {
         var item = await _repo.GetInventoryItemBySkuAsync(sku);
 
-        var response = new InventoryReturnDTO
-        {
-            Name = item?.Product.Name,
-            Sku = item?.Product.Sku,
-            CurrentStock = item!.CurrentStock
-        };
-
         if (item is null)
             return NotFound();
-        else
-            return Ok(response);
+        var response = new InventoryReturnDTO
+        {
+            Name = item.Product.Name,
+            Sku = item.Product.Sku,
+            CurrentStock = item.CurrentStock
+        };
+
+
+        return Ok(response);
     }
 }

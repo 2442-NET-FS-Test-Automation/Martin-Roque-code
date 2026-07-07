@@ -16,5 +16,5 @@ public class Buying
 
     public DateTime? CompletedUtc { get; set; }
 
-    public BuyingLine Lines { get; set; } = new();
+    public List<BuyingLine> Lines { get; set; } = new();
 }
