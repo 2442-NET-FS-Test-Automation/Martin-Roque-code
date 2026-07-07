@@ -33,6 +33,7 @@ builder.Services.AddDbContextFactory<LibraryDbContext>(options => options.UseSql
 builder.Services.AddScoped<IFulfillmentService, FulfillmentService>();
 builder.Services.AddScoped<ISeeder, Seeder>();
 builder.Services.AddScoped<BurstPlanner>(); // adding our BurstPlanner, will be used in FulfillmentService
+builder.Services.AddScoped<OrderFactory>();
 
 //Swagger added to builder
 builder.Services.AddEndpointsApiExplorer();
@@ -85,6 +86,15 @@ app.MapGet("/peek/tracking", (LibraryDbContext db) =>
 
     return states;
 });
+
+// Peek - Loading Strategies
+app.MapGet("/peek/loading", (LibraryDbContext db) =>
+{
+    Product product = db.Products.First();
+    //Explicit loading via Load()
+    db.Entry(product).Reference(p => p.Inventory).Load();
+});
+
 
 //Manually create a conflict in a project - do not replicate
 app.MapGet("/peek/conflict", (IServiceScopeFactory scopes) =>
@@ -262,9 +272,50 @@ app.MapGet("/report/top-products", (LibraryDbContext db) =>
     return ranked;
 });
 
+//Binary search on the sorted result
+app.MapGet("/reports/rank-of/{units:int}", (int units, LibraryDbContext db) =>
+{
+    // Find product ranking that sold x units
+    var unitsDesc = db.FulfillmentEvents
+        .Where(e => e.Type == "Fulfilled")
+        .Join(db.OrderLines, e => e.OrderId, l => l.OrderId, (e, l) => l)
+        .GroupBy(l => l.ProductId)
+        .Select(g => g.Sum(l => l.Quantity))
+        .OrderByDescending(u => u)
+        .ToArray();
+
+    var index = Array.BinarySearch(unitsDesc, units, Comparer<int>.Create((a, b) => b.CompareTo(a)));
+
+    return new { units, rank = index > 0 ? index + 1 : -1 };
+});
+
+app.MapPost("/orders-with-factory", async (OrderRequest req, OrderFactory factory,
+    IDbContextFactory<LibraryDbContext> dbf, CancellationToken ct) =>
+{
+    try
+    {
+        Order newOrder = factory.CreateOrder(req.Kind, req.CustomerId,
+            req.Lines.Select(l => (l.Sku, l.Qty)));
+
+        await using var db = await dbf.CreateDbContextAsync(ct);
+
+        db.Orders.Add(newOrder);
+
+        return Results.Created($"/orders/{newOrder.Id}", new { newOrder.Id });
+    }
+    catch (UnknownSkuException ex)
+    {
+        Log.Warning("Rejected order: unknown SKU {sku}", ex.Sku);
+        return Results.BadRequest(new { error = ex.Message, sku = ex.Sku });
+    }
+});
+
 //Where file ends
 app.Run();
 
 Log.CloseAndFlush();
 
 public record OrderPayLoad(int ProductId, int Quantity, int CustomerId);
+
+public record OrderLineRequest(string Sku, int Qty);
+public record OrderRequest(string Kind, int CustomerId, List<OrderLineRequest> Lines);

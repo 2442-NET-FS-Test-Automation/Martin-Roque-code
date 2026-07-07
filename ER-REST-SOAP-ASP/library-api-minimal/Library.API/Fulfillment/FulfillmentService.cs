@@ -1,9 +1,9 @@
 //This class will hold the business logic/db retry logic for fulfilling transactions
-using System.Collections;
 using Library.Data;
 using Library.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Collections.Concurrent;
 
 namespace Library.API.Fulfillment;
 
@@ -13,6 +13,7 @@ public interface IFulfillmentService
 {
     public Task<FulfillmentResult> FulfillOneAsync(int orderId, CancellationToken ct);
     public Task<BurstResult> FulFillBurstAsync(IEnumerable<int> orderIds, CancellationToken ct);
+    public int ResolveProductId(string sku);
 }
 
 public enum FulfillmentResult { Fulfilled, Backordered }
@@ -24,11 +25,24 @@ public class FulfillmentService : IFulfillmentService
 {
     private readonly IDbContextFactory<LibraryDbContext> _factory;
     private readonly BurstPlanner _planner;
+    private readonly ConcurrentDictionary<string, int> _skuToProductId;
 
     public FulfillmentService(IDbContextFactory<LibraryDbContext> factory, BurstPlanner planner)
     {
         _factory = factory;
         _planner = planner;
+        using var db = _factory.CreateDbContext();
+        _skuToProductId = new ConcurrentDictionary<string, int>(
+            db.Products.ToDictionary(p => p.Sku, p => p.Id)
+        );
+    }
+
+    //Method to resolve Skus to ProductId using that dictionary
+    public int ResolveProductId(string sku)
+    {
+        try { return _skuToProductId[sku]; }
+        catch (KeyNotFoundException) { throw new UnknownSkuException(sku); }
+
     }
 
     //Method to handle fulfillment
@@ -104,6 +118,7 @@ public class FulfillmentService : IFulfillmentService
             }
             catch (DbUpdateConcurrencyException ex) //How many times to handle the exception for us, +3 ww won't enter the catch
             {
+                Log.Warning("Attempt retry");
                 foreach (var entry in ex.Entries)
                 {
                     var current = await entry.GetDatabaseValuesAsync();
