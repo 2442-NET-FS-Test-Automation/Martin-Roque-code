@@ -5,8 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Diagnostics;
 
-
-
 var builder = WebApplication.CreateBuilder(args);
 
 var conn_string = "Server=localhost,1433;Database=VideoGameStoreMinimalAPI;User Id=sa;Password=LibPass123;TrustServerCertificate=true";
@@ -30,7 +28,6 @@ builder.Services.AddScoped<BurstPlanner>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
 var app = builder.Build();
 
 app.UseSwagger();
@@ -38,7 +35,6 @@ app.UseSwaggerUI();
 
 app.MapGet("/inventory", async (VideoGameStoreDbContext db) =>
 {
-
     return await db.Inventory.ToListAsync();
 });
 
@@ -49,7 +45,6 @@ app.MapGet("/videogames", async (VideoGameStoreDbContext db) =>
 
 app.MapPost("/inventory/seed", (VideoGameStoreDbContext db, ILogger<Program> logger) =>
 {
-
     logger.LogInformation("Started seeing database");
 
     foreach (InventoryItem inv in db.Inventory)
@@ -105,7 +100,6 @@ app.MapPost("/buyings/burst", (int n, bool expedited, ISeeder seeder,
 
 app.MapPost("/benchmark", async (int n, IFulfillmentService fs, ISeeder seeder, CancellationToken ct) =>
 {
-
     var ids1 = seeder.ResetAndCreateBuyings(n);
 
     // First, sequential
@@ -185,3 +179,4 @@ app.MapGet("/verify/no-oversell", (VideoGameStoreDbContext db) =>
 });
 
 app.Run();
+Log.CloseAndFlush();

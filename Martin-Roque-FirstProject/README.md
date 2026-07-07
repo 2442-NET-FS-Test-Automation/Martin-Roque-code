@@ -27,9 +27,10 @@
 #### Status and Priority (Buying): easier to filter in endpoints.
 
 ## Benchmark time
-#### Sequential:
-#### Concurrency:
-#### Conclusion: Concurrency is better when more and more orders are comming
+#### 300, 1000
+#### Sequential: 16922, 33137
+#### Concurrency: 22268, 105206
+#### Conclusion: Concurrency is better when more and more orders are comming and no errors are present
 
 ## Status codes
 #### 200: to notify user about it action was done
