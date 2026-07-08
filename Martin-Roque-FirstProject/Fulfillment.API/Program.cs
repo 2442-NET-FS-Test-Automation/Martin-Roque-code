@@ -7,42 +7,60 @@ using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//Connection string needed to access to database (SQL Server in docker) - in production we need to hide it
 var conn_string = "Server=localhost,1433;Database=VideoGameStoreMinimalAPI;User Id=sa;Password=LibPass123;TrustServerCertificate=true";
 
+//Configuration to use Serilog in this project in .Net.
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File("logs/fulfillment-log-.log", rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
+//Bring access to Serilog to this application
 builder.Host.UseSerilog();
 
+//Use normal dbContext to process that it not necessary optimize all the calls to a dbcontext
 builder.Services.AddDbContext<VideoGameStoreDbContext>(options => options.UseSqlServer(conn_string),
     ServiceLifetime.Scoped, ServiceLifetime.Singleton);
 
+//Use a Factory when is necessary keep the same dbContext instance
 builder.Services.AddDbContextFactory<VideoGameStoreDbContext>(options => options.UseSqlServer(conn_string));
 
+//Declaring own services to be used in the application
 builder.Services.AddScoped<IFulfillmentService, FulfillmentService>();
 builder.Services.AddScoped<ISeeder, Seeder>();
 builder.Services.AddScoped<BurstPlanner>();
 
+
+//Starting swagger to use it in the presentation
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+//Using Swagget for UI for presentation
 app.UseSwagger();
 app.UseSwaggerUI();
 
+//Show all inventory items information in database
 app.MapGet("/inventory", async (VideoGameStoreDbContext db) =>
 {
     return await db.Inventory.ToListAsync();
 });
 
+//Show all videogames information in database (for demostration)
 app.MapGet("/videogames", async (VideoGameStoreDbContext db) =>
 {
     return await db.Videogames.ToListAsync();
 });
 
+//Show all customer information in database (for demostration)
+app.MapGet("/customers", async (VideoGameStoreDbContext db) =>
+{
+    return await db.Customers.ToListAsync();
+});
+
+//Seed all information for starting values (defined before in this code)
 app.MapPost("/inventory/seed", (VideoGameStoreDbContext db, ILogger<Program> logger) =>
 {
     logger.LogInformation("Started seeing database");
@@ -76,6 +94,7 @@ app.MapPost("/inventory/seed", (VideoGameStoreDbContext db, ILogger<Program> log
 
 });
 
+//simulating a burst of buyings for the shop
 app.MapPost("/buyings/burst", (int n, bool expedited, ISeeder seeder,
     IServiceScopeFactory scopes, IHostApplicationLifetime lifetime) =>
 {
@@ -98,6 +117,8 @@ app.MapPost("/buyings/burst", (int n, bool expedited, ISeeder seeder,
 
 });
 
+
+//Compare behavior between the sequential mode and a parallel mode to fulfilll the same number of buyings
 app.MapPost("/benchmark", async (int n, IFulfillmentService fs, ISeeder seeder, CancellationToken ct) =>
 {
     var ids1 = seeder.ResetAndCreateBuyings(n);
@@ -119,12 +140,14 @@ app.MapPost("/benchmark", async (int n, IFulfillmentService fs, ISeeder seeder, 
 
     return new
     {
+        //Returning the time in milliseconds
         sequentialMs = sw1.ElapsedMilliseconds,
         concurrentMs = sw2.ElapsedMilliseconds
     };
 
 });
 
+//Show how many buyings where fulfilled in total
 app.MapGet("/reports/by-fulfillment", (VideoGameStoreDbContext db) =>
 {
     return db.Buyings
@@ -135,7 +158,9 @@ app.MapGet("/reports/by-fulfillment", (VideoGameStoreDbContext db) =>
 
 });
 
-app.MapGet("/reports/top-videogames", (VideoGameStoreDbContext db) =>
+
+//How many videogames were bought in total
+app.MapGet("/reports/videogames", (VideoGameStoreDbContext db) =>
 {
     var ranked = db.FulfillmentEvents
         .Where(e => e.Type == "Fulfilled")
@@ -148,7 +173,8 @@ app.MapGet("/reports/top-videogames", (VideoGameStoreDbContext db) =>
     return ranked;
 });
 
-app.MapGet("/reports/top-customers", (VideoGameStoreDbContext db) =>
+//How many buys do each customer in total
+app.MapGet("/reports/customers", (VideoGameStoreDbContext db) =>
 {
     var ranked = db.FulfillmentEvents
         .Where(e => e.Type == "Fulfilled")
@@ -163,6 +189,7 @@ app.MapGet("/reports/top-customers", (VideoGameStoreDbContext db) =>
     return ranked;
 });
 
+//Verify if the stock of each videogame does not be less that 0
 app.MapGet("/verify/no-oversell", (VideoGameStoreDbContext db) =>
 {
     var rows = db.Inventory.Include(i => i.Videogame).ToList();

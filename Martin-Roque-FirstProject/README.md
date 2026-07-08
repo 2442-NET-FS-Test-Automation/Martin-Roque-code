@@ -4,12 +4,13 @@
 ## Endpoint Map
 #### /inventory - Show all inventory items
 #### /videogames - Show all videogames stored (to now what I am selling)
+#### /customers - Show all customers registered in the database
 #### /inventory/seed - Restock inventory
 #### /buyings/burst - Calling a burst of buyings
 #### /benchmark - comparing sequential with concurrent
 #### /reports/by-fulfillment - how many buyings were fulfilled
-#### /reports/top-videogames - how many videogames are in buyinglines
-#### /reports/top-customers - which customer bought more games
+#### /reports/videogames - how many videogames are in buyinglines
+#### /reports/customers - which customer bought more games
 #### /verify/no-oversell - confirm the program do not oversell any videogame in the buyings
 
 ## Big-O
