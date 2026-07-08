@@ -1,3 +1,4 @@
+using Library.ControllerApi.DTOs;
 using Library.Data.Entities;
 
 namespace Library.ControllerApi.Services;
@@ -8,7 +9,7 @@ public interface IInventoryService
 
     Task<InventoryItem?> BySkuAsync(string sku);
 
-    //Task<InventoryItem> AddAsync();
+    Task<InventoryItem> AddAsync(InventoryCreateDto dto);
 
     Task<bool> RemoveAsync(string sku);
 

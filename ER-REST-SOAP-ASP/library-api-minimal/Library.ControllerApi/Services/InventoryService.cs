@@ -1,3 +1,4 @@
+using Library.ControllerApi.DTOs;
 using Library.Data;
 using Library.Data.Entities;
 
@@ -24,10 +25,10 @@ public class InventoryService : IInventoryService
         return _repo.GetInventoryItemBySkuAsync(sku);
     }
 
-    // public Task<InventoryItem> AddAsync()
-    // {
-    //     return _repo.AddInvetoryItemAsync();
-    // }
+    public Task<InventoryItem> AddAsync(InventoryCreateDto dto)
+    {
+        return _repo.AddInvetoryItemAsync(dto.Sku, dto.Name, dto.Price, dto.CurrentStock);
+    }
 
     public Task<bool> RemoveAsync(string sku)
     {

@@ -78,4 +78,28 @@ public class InventoryController : ControllerBase
 
         // return Ok(response);
     }
+
+    [HttpPost]
+    public async Task<ActionResult<InventoryDTO>> Create(InventoryCreateDto newInv)
+    {
+        var created = await _service.AddAsync(newInv);
+        var response = _mapper.Map<InventoryDTO>(created);
+
+        return CreatedAtAction(nameof(GetBySku), new { sku = response.Sku }, response);
+    }
+
+    [HttpDelete("{sku}")]
+    public async Task<ActionResult> Delete(string sku)
+    {
+        bool isDeleted = await _service.RemoveAsync(sku);
+
+        if (isDeleted)
+        {
+            return NoContent();
+        }
+        else
+        {
+            return NotFound();
+        }
+    }
 }
