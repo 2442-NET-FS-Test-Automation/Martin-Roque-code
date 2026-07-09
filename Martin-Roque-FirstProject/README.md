@@ -1,41 +1,122 @@
-## Domain: 
-#### Videogame Store.
+# Videogames Store API (Domain)
 
-## Endpoint Map
-#### /inventory - Show all inventory items
-#### /videogames - Show all videogames stored (to now what I am selling)
-#### /customers - Show all customers registered in the database
-#### /inventory/seed - Restock inventory
-#### /buyings/burst - Calling a burst of buyings
-#### /benchmark - comparing sequential with concurrent
-#### /reports/by-fulfillment - how many buyings were fulfilled
-#### /reports/videogames - how many videogames are in buyinglines
-#### /reports/customers - which customer bought more games
-#### /verify/no-oversell - confirm the program do not oversell any videogame in the buyings
+> A REST API that simulates a videogames store with inventory management, buying processing, concurrency testing, benchmarking, and reporting.
 
-## Big-O
-#### The algorithm for priority queue is O(n log n) because both of the parts increase in that way with the buying's total.
+---
 
-## Optimistic concurrency vs Lock
-#### In this case concurrency give security about execute code without problems but with little inconsisty
-#### vs Lock it is 100% consistent but can lead to starve or deadlocks easier.
+#  Endpoint Map
 
-## ACID
-#### We use ACID's principles to make sure the data will be consistent and avoid phantom and dirty lectures for the system.
+| Endpoint | Description |
+|----------|-------------|
+| `GET /inventory` | Show all inventory items |
+| `GET /videogames` | Show all videogames stored (available for sale) |
+| `GET /customers` | Show all registered customers |
+| `POST /inventory/seed` | Restock the inventory |
+| `POST /buyings/burst` | Execute a burst of buying requests |
+| `GET /benchmark` | Compare sequential and concurrent execution |
+| `GET /reports/by-fulfillment` | Show fulfilled buying statistics |
+| `GET /reports/videogames` | Show videogames included in buying lines |
+| `GET /reports/customers` | Show the customers who purchased the most games |
+| `GET /verify/no-oversell` | Verify that no videogame was oversold |
 
-## non-key index used:
-#### SpeIden: Identify easier a Videogame.
-#### Status and Priority (Buying): easier to filter in endpoints.
+---
 
-## Benchmark time
-#### 300, 1000
-#### Sequential: 16922, 33137
-#### Concurrency: 22268, 105206
-#### Conclusion: Concurrency is better when more and more orders are comming and no errors are present
+# Algorithm Complexity
 
-## Status codes
-#### 200: to notify user about it action was done
-#### 204: to nofity creation of an object
-#### 400: Something go wrong during execution
-#### 404: wrong Url
-#### 500: server is down
+## Priority Queue
+
+```text
+Time Complexity: O(n log n)
+```
+
+The priority queue processes all buying requests by inserting and removing elements. Since both operations are logarithmic, the overall complexity is:
+
+> **O(n log n)**
+
+---
+
+#  Concurrency Strategy
+
+## Optimistic Concurrency
+
+**Advantages**
+
+- Better throughput
+- Allows multiple operations simultaneously
+- Reduces blocking
+
+**Disadvantages**
+
+- May produce retries due to conflicts
+- Slightly less consistent during heavy contention
+
+---
+
+## Lock-Based Synchronization
+
+**Advantages**
+
+- Guarantees full consistency
+- Prevents concurrent modifications
+
+**Disadvantages**
+
+- Higher contention
+- Can lead to starvation
+- Possibility of deadlocks
+
+---
+
+# ACID Principles
+
+The application follows the **ACID** principles to ensure data integrity.
+
+-  Atomicity
+-  Consistency
+-  Isolation
+-  Durability
+
+This helps prevent problems such as:
+
+- Dirty reads
+- Phantom reads
+- Inconsistent transactions
+
+---
+
+# Database Indexes
+
+The following non-key indexes are used to improve query performance.
+
+| Index | Purpose |
+|-------|---------|
+| `SpecIden` | Quickly identify a videogame |
+| `Status` | Speed up buying status filtering |
+| `Priority` | Optimize priority-based buying queries |
+
+---
+
+# Benchmark Results
+
+| Orders | Sequential (ms) | Concurrent (ms) |
+|--------:|----------------:|----------------:|
+| 300 | 16,922 | 22,268 |
+| 1000 | 33,137 | 105,206 |
+
+### Conclusion
+
+> Concurrency becomes more beneficial as the number of requests increases, provided contention remains low and conflicts are minimized.
+
+---
+
+# HTTP Status Codes
+
+| Code | Meaning |
+|------|---------|
+|  `200 OK` | Request completed successfully |
+|  `204 No Content` | Resource created or processed successfully without returning content |
+|  `400 Bad Request` | Invalid request or input |
+|  `404 Not Found` | Requested resource does not exist |
+|  `500 Internal Server Error` | Unexpected server error |
+
+---
