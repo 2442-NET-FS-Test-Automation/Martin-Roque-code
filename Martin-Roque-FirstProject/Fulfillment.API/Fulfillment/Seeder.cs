@@ -10,6 +10,7 @@ public interface ISeeder
 
 public class Seeder : ISeeder
 {
+    //Specify all possible videogames that exists in this project
     public static readonly string[] specialIds = { "VGM-001", "VGM-002", "VGM-003", "VGM-004" };
 
     private readonly IDbContextFactory<VideoGameStoreDbContext> _factory;
@@ -19,6 +20,7 @@ public class Seeder : ISeeder
         _factory = factory;
     }
 
+    //Method used for restablish inventory stock to default values
     public IReadOnlyList<int> SeedBuyings(int n, bool expedited)
     {
         using var db = _factory.CreateDbContext();
@@ -31,7 +33,7 @@ public class Seeder : ISeeder
         {
             var buying = new Buying
             {
-                CustomerId = Random.Shared.Next(1, 3),
+                CustomerId = Random.Shared.Next(1, 4),
                 Priority = expedited ? Priority.Expedited : Priority.Normal,
                 Lines = { new BuyingLine { GameId = vid[specialIds[i % specialIds.Length]], Quantity = 1 } }
             };
@@ -78,9 +80,9 @@ public class Seeder : ISeeder
         {
             var buying = new Buying
             {
-                CustomerId = Random.Shared.Next(1, 3),
+                CustomerId = Random.Shared.Next(1, 4),
                 Priority = i % 3 == 0 ? Priority.Expedited : Priority.Normal,
-                Lines = { new BuyingLine { GameId = vid[new[] { "VGM-001", "VGM-002", "VGM-003", "VGM-004" }[i % 3]], Quantity = 1 } }
+                Lines = { new BuyingLine { GameId = vid[new[] { "VGM-001", "VGM-002", "VGM-003", "VGM-004" }[i % 4]], Quantity = 1 } }
             };
 
             db.Buyings.Add(buying);

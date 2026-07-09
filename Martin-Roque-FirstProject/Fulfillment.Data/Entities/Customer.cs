@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VideoGameStore.Data.Entities;
 
-[Table("Customers")]
+[Table("Customers")] //Changing table name
 public class Customer
 {
     public int Id { get; set; }

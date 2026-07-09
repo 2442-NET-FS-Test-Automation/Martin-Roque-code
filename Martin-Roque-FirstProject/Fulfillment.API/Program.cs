@@ -206,4 +206,5 @@ app.MapGet("/verify/no-oversell", (VideoGameStoreDbContext db) =>
 });
 
 app.Run();
+//Close Serilog and free memory and the session for the next time
 Log.CloseAndFlush();
