@@ -22,6 +22,18 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
+
+const string SpaCorsPolicy = "spa";
+
+builder.Services.AddCors(o => o.AddPolicy(SpaCorsPolicy, p => p
+    .WithOrigins("http://localhost:3000")
+    .AllowAnyHeader()
+    .AllowAnyMethod()));
+
+// Adding our httpClient
+builder.Services.AddHttpClient<ISupplierClient, SupplierClient>(c =>
+    c.BaseAddress = new Uri("https://dummyjson.com/"));
+
 //Registring our custom Repo and Service Layer
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
@@ -35,6 +47,10 @@ builder.Services.AddControllers(o => o.Filters.Add<TimingFilter>());
 builder.Services.AddOpenApi();
 
 builder.Services.AddSwaggerGen();
+
+// Adding caching
+builder.Services.AddMemoryCache();
+builder.Services.AddResponseCaching();
 
 var app = builder.Build();
 
@@ -72,6 +88,10 @@ app.Use(async (ctx, next) =>
     await next(ctx);
 });
 
+app.UseResponseCaching();
+
+app.UseCors(SpaCorsPolicy);
+
 app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
@@ -81,3 +101,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+Log.CloseAndFlush();
