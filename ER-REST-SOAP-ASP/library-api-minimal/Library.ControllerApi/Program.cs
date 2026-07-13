@@ -1,10 +1,13 @@
 using System.Diagnostics;
+using System.Text;
 using Library.ControllerApi.Filters;
 using Library.ControllerApi.Mapping;
 using Library.ControllerApi.Middleware;
 using Library.ControllerApi.Services;
 using Library.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,11 +33,34 @@ builder.Services.AddCors(o => o.AddPolicy(SpaCorsPolicy, p => p
     .AllowAnyHeader()
     .AllowAnyMethod()));
 
+// Validation side of JWT. Issuance lives in TokenService
+var jwtKey = builder.Configuration["Jwt:Key"];
+
+//Harcoding the issuer and audience - these hace to match the ones we set on the token
+const string jwtIssuer = "library-fulfillment";
+const string jwtAudience = "library-fulfillment-clients";
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(o => o.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidIssuer = jwtIssuer,
+        ValidateAudience = true,
+        ValidAudience = jwtAudience,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)),
+        ValidateLifetime = true
+    });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddSingleton<ITokenService, TokenService>();
+
 // Adding our httpClient
 builder.Services.AddHttpClient<ISupplierClient, SupplierClient>(c =>
     c.BaseAddress = new Uri("https://dummyjson.com/"));
 
-//Registring our custom Repo and Service Layer
+// Registring our custom Repo and Service Layer
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 
@@ -92,11 +118,12 @@ app.UseResponseCaching();
 
 app.UseCors(SpaCorsPolicy);
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
-
-app.UseAuthorization();
 
 app.MapControllers();
 
