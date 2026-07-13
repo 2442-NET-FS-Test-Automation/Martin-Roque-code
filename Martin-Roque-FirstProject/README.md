@@ -12,6 +12,7 @@
 | `GET /videogames` | Show all videogames stored (available for sale) |
 | `GET /customers` | Show all registered customers |
 | `POST /inventory/seed` | Restock the inventory |
+| `POST /buyings/burst` | Execute a buying request |
 | `POST /buyings/burst` | Execute a burst of buying requests |
 | `GET /benchmark` | Compare sequential and concurrent execution |
 | `GET /reports/by-fulfillment` | Show fulfilled buying statistics |
