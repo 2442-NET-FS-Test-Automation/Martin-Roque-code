@@ -82,6 +82,12 @@ app.MapPost("/inventory/seed", (VideoGameStoreDbContext db, ILogger<Program> log
             case 4:
                 inv.CurrentStock = 7;
                 break;
+            case 5:
+                inv.CurrentStock = 4;
+                break;
+            case 6:
+                inv.CurrentStock = 11;
+                break;
             default:
                 break;
         }
@@ -90,8 +96,29 @@ app.MapPost("/inventory/seed", (VideoGameStoreDbContext db, ILogger<Program> log
 
     db.SaveChanges();
     logger.LogInformation("Stock reset");
-    return Results.Ok("stock reset");
+    return Results.Ok("Stock Reset");
 
+});
+
+app.MapPost("/buyings", async (BuyingPayload buyingRequest, IDbContextFactory<VideoGameStoreDbContext> factory,
+            CancellationToken ct, IFulfillmentService fs) =>
+{
+    await using var db = await factory.CreateDbContextAsync(ct); // ask for db context to place order
+
+    var newBuying = new Buying
+    {
+        CustomerId = buyingRequest.CustomerId,
+        Priority = Priority.Normal,
+        // Using the orderRequest from the HTTP request body to create my order
+        Lines = { new BuyingLine { GameId = buyingRequest.ProductId, Quantity = buyingRequest.Quantity } }
+    };
+
+    db.Buyings.Add(newBuying); // add new Buying 
+    await db.SaveChangesAsync(ct); // save that order to db
+
+
+    FulfillmentResult result = await fs.FulfillOneAsync(newBuying.Id, ct);
+    return Results.Ok(new { buyingId = newBuying.Id, result = result.ToString() });
 });
 
 //simulating a burst of buyings for the shop
@@ -208,3 +235,5 @@ app.MapGet("/verify/no-oversell", (VideoGameStoreDbContext db) =>
 app.Run();
 //Close Serilog and free memory and the session for the next time
 Log.CloseAndFlush();
+
+public record BuyingPayload(int ProductId, int Quantity, int CustomerId);

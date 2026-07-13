@@ -11,7 +11,7 @@ public interface ISeeder
 public class Seeder : ISeeder
 {
     //Specify all possible videogames that exists in this project
-    public static readonly string[] specialIds = { "VGM-001", "VGM-002", "VGM-003", "VGM-004" };
+    public static readonly string[] specialIds = { "VGM-001", "VGM-002", "VGM-003", "VGM-004", "VGM-005", "VGM-006" };
 
     private readonly IDbContextFactory<VideoGameStoreDbContext> _factory;
 
@@ -33,7 +33,7 @@ public class Seeder : ISeeder
         {
             var buying = new Buying
             {
-                CustomerId = Random.Shared.Next(1, 4),
+                CustomerId = Random.Shared.Next(1, 6),
                 Priority = expedited ? Priority.Expedited : Priority.Normal,
                 Lines = { new BuyingLine { GameId = vid[specialIds[i % specialIds.Length]], Quantity = 1 } }
             };
@@ -65,6 +65,12 @@ public class Seeder : ISeeder
                 case 4:
                     inv.CurrentStock = 7;
                     break;
+                case 5:
+                    inv.CurrentStock = 4;
+                    break;
+                case 6:
+                    inv.CurrentStock = 11;
+                    break;
                 default:
                     break;
             }
@@ -80,9 +86,9 @@ public class Seeder : ISeeder
         {
             var buying = new Buying
             {
-                CustomerId = Random.Shared.Next(1, 4),
+                CustomerId = Random.Shared.Next(1, 6),
                 Priority = i % 3 == 0 ? Priority.Expedited : Priority.Normal,
-                Lines = { new BuyingLine { GameId = vid[new[] { "VGM-001", "VGM-002", "VGM-003", "VGM-004" }[i % 4]], Quantity = 1 } }
+                Lines = { new BuyingLine { GameId = vid[new[] { "VGM-001", "VGM-002", "VGM-003", "VGM-004", "VGM-005", "VGM-006" }[i % specialIds.Length]], Quantity = 1 } }
             };
 
             db.Buyings.Add(buying);

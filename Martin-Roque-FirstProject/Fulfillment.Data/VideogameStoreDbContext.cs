@@ -40,20 +40,26 @@ public class VideoGameStoreDbContext : DbContext
             new Videogame { Id = 1, SpeIden = "VGM-001", Name = "Donkey Kong Bananza", ESRB = "E for Everyone", Price = 78.50m },
             new Videogame { Id = 2, SpeIden = "VGM-002", Name = "Halo Remaster Collection", ESRB = "+13 years old", Price = 48.90m },
             new Videogame { Id = 3, SpeIden = "VGM-003", Name = "Minecraft", ESRB = "E for Everyone", Price = 22.75m },
-            new Videogame { Id = 4, SpeIden = "VGM-004", Name = "Terraria", ESRB = "E+10", Price = 15.50m }
+            new Videogame { Id = 4, SpeIden = "VGM-004", Name = "Terraria", ESRB = "E+10", Price = 15.50m },
+            new Videogame { Id = 5, SpeIden = "VGM-005", Name = "Splatoon Riders", ESRB = "E+10", Price = 65.50m },
+            new Videogame { Id = 6, SpeIden = "VGM-006", Name = "GTA VI", ESRB = "M+18", Price = 99.99m }
         );
 
         mb.Entity<InventoryItem>().HasData(
             new InventoryItem { Id = 1, ProductId = 1, CurrentStock = 5 },
             new InventoryItem { Id = 2, ProductId = 2, CurrentStock = 3 },
             new InventoryItem { Id = 3, ProductId = 3, CurrentStock = 9 },
-            new InventoryItem { Id = 4, ProductId = 4, CurrentStock = 7 }
+            new InventoryItem { Id = 4, ProductId = 4, CurrentStock = 7 },
+            new InventoryItem { Id = 5, ProductId = 5, CurrentStock = 4 },
+            new InventoryItem { Id = 6, ProductId = 6, CurrentStock = 11 }
         );
 
         mb.Entity<Customer>().HasData(
             new Customer { Id = 1, Name = "Lyon Kennedy", Email = "lyon.kennedy@gmail.com" },
             new Customer { Id = 2, Name = "Lara Croft", Email = "lara.croft@gmail.com" },
-            new Customer { Id = 3, Name = "Fox McCloud", Email = "fox.mccloud@gmail.com" }
+            new Customer { Id = 3, Name = "Fox McCloud", Email = "fox.mccloud@gmail.com" },
+            new Customer { Id = 4, Name = "Axel Blaze", Email = "axel.blaze@gmail.com" },
+            new Customer { Id = 5, Name = "Nene Kusanagi", Email = "nene.kusanagu@gmail.com " }
         );
     }
 }
