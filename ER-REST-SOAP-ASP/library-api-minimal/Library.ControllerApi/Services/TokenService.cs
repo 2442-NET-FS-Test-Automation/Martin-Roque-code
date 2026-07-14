@@ -23,14 +23,14 @@ public class TokenService : ITokenService
     }
 
     //Method for token issuance
-    public string Issue(string user)
+    public string Issue(string user, string role)
     {
         //sign the token with a symmetric key (HMAC-SHA256)
         var creds = new SigningCredentials(
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key!)), SecurityAlgorithms.HmacSha256
         );
 
-        var role = Roles.GetValueOrDefault(user, "consumer");
+        //var role = Roles.GetValueOrDefault(user, "consumer");
 
         var token = new JwtSecurityToken("library-fulfillment", "library-fulfillment-clients",
             new[] { new Claim(ClaimTypes.Name, user), new Claim(ClaimTypes.Role, role) },

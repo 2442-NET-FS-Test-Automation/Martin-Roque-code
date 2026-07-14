@@ -5,7 +5,9 @@ using Library.ControllerApi.Mapping;
 using Library.ControllerApi.Middleware;
 using Library.ControllerApi.Services;
 using Library.Data;
+using Library.Data.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -17,6 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 var conn_string = "Server=localhost,1433;Database=LibraryMinimalDb;User ID=sa;Password=LibPass123;TrustServerCertificate=true";
 
 builder.Services.AddDbContextFactory<LibraryDbContext>(o => o.UseSqlServer(conn_string));
+builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -63,6 +66,7 @@ builder.Services.AddHttpClient<ISupplierClient, SupplierClient>(c =>
 // Registring our custom Repo and Service Layer
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Adding our mapping profile for AutoMapper
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(MappingProfile).Assembly));
@@ -79,6 +83,21 @@ builder.Services.AddMemoryCache();
 builder.Services.AddResponseCaching();
 
 var app = builder.Build();
+
+// Seeding admins - cant do a plain INSERT INTO using SQl because I won't have a hashed password
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<LibraryDbContext>();
+    if (!db.Users.Any(u => u.Role == "admin"))
+    {
+        var hasher = new PasswordHasher<User>();
+        var admin = new User { UserName = "ada", Role = "admin" };
+        admin.PasswordHash = hasher.HashPassword(admin, "pass123!");
+
+        db.Users.Add(admin);
+        db.SaveChanges();
+    }
+}
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 

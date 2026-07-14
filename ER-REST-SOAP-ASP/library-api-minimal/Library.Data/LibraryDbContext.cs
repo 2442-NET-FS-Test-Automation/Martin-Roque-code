@@ -16,6 +16,7 @@ public class LibraryDbContext : DbContext
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderLine> OrderLines => Set<OrderLine>();
     public DbSet<FulfillmentEvent> FulfillmentEvents { get; set; }
+    public DbSet<User> Users => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -36,6 +37,9 @@ public class LibraryDbContext : DbContext
 
         b.Entity<Customer>().Property(c => c.Email).HasMaxLength(256);
         b.Entity<Customer>().HasIndex(c => c.Email).IsUnique();
+
+        // User needs a unique username - best to use Fluent API
+        b.Entity<User>().HasIndex(u => u.UserName).IsUnique();
 
         b.Entity<Product>().HasData(
             new Product { Id = 1, Sku = "BK-001", Name = "Clean Code", Price = 32.00m },
