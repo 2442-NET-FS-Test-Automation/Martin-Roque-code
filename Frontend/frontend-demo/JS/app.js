@@ -9,6 +9,33 @@
 //Populate this empty array via fetch
 let catalogItems = [];
 
+async function loadCatalog() {
+    const container = document.querySelector("#catalog-cards");
+
+    const loading = document.createElement("p");
+    loading.className = "hint";
+    loading.textContent = "loading..."
+
+    container.innerHTML= "";
+    container.appendChild(loading);
+
+    try{
+        const response = await fetch(`${API}/api/Inventory`);
+        if(!response.ok) {
+            container.innerHTML = `<p class="hint">API said ${response.status}</p>`;
+            return;
+        }
+
+        catalogItems = await response.json();
+        renderCards(catalogItems);
+
+    }catch (err){
+        //Fecth doesn't throw errors for 400/500s
+        console.error(err);
+        container.innerHTML = `<p class="hint">cannot reach the API. Is it on?</p>`;
+    }
+}
+
 function renderCards(items) {
     const container = document.getElementById("catalog-cards");
 
@@ -22,7 +49,6 @@ function renderCards(items) {
                 <h3>${item.name}</h3>
                 <dl>
                     <dt>SKU</dt><dd>${item.sku}</dd>
-                    <dt>Price</dt><dd>${item.price.toFixed(2)}</dd>
                     <dt>In Stock</dt><dd>${item.currentStock}</dd>
                 </dl>
                 <button class="price-btn" data-sku="${item.sku}">Supplier price</button>
@@ -50,11 +76,18 @@ document.querySelector("#search").addEventListener("input", (e) => {
 });
 
  document.addEventListener("DOMContentLoaded", () => {
-        renderCards(catalogItems);
+        // fetch(`${API}/api/Inventory`)
+        // .then(res => res.json())
+        // .then(items => {
+        //     catalogItems = items;
+        //     items.map(item => item.price = 5)
+        //     renderCards(items);
+        // });
+        loadCatalog();
 });
 
 // Trasient/temp - we will wrap this in methods later
 //Promise chain example
-fetch(`${API}/api/Inventory`)
-    .then(res => res.json())
-    .then(items => { catalogItems = items; renderCards(items)});
+// fetch(`${API}/api/Inventory`)
+//     .then(res => res.json())
+//     .then(items => { catalogItems = items; renderCards(items)});
