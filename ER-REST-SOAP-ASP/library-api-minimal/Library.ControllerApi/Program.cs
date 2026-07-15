@@ -32,7 +32,7 @@ builder.Host.UseSerilog();
 const string SpaCorsPolicy = "spa";
 
 builder.Services.AddCors(o => o.AddPolicy(SpaCorsPolicy, p => p
-    .WithOrigins("http://localhost:3000")
+    .WithOrigins("http://localhost:5500")
     .AllowAnyHeader()
     .AllowAnyMethod()));
 
