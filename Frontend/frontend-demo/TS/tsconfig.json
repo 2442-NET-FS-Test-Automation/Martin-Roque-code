@@ -1,0 +1,24 @@
+{
+    // tsc read this file when we run commands like npx tsc
+    "compilerOptions": {
+        // Target - which version of JS to emit - we will use es2025
+        "target": "es2025",
+        // lib - lets us set a default library of functions available to us
+        "lib": ["ES2025"],
+        // Modules - how imports are emitted and resolved. nodenext = real ES modules
+        "module": "nodenext",
+        // who's global types do we get? We will use Node's. Things like console for console.log
+        "types": ["Node"],
+        // Strict - Turns on strictNullChecks, noImplicityAny and some other options all in one.
+        "strict": true,
+        // We call the Tsc to skip type checking inside node_modules 
+        "skipLibCheck": true,
+        // a working build doesn't override the last working output
+        "noEmitOnError": true,
+        // sources for our TS is in the current directory, output into dist/
+        "rootDir": ".",
+        "outDir": "dist"
+    },
+    // only compile stuff inside the TS folder and it's subdirectories
+    "include": ["./**/*"]
+}
