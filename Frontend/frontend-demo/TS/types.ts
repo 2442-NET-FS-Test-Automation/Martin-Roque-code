@@ -34,3 +34,7 @@ export enum SortDirection {
     Ascending = "asc",
     Descending = "desc"
 }
+
+export type InventoryPatch = Partial<InventoryItem>;
+
+export type NewInventoryItem = Omit<InventoryItem, "sku">;
