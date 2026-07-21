@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { BookCard } from "./BookCard";
+import { BookCard } from "../components/BookCard";
 import { type InventoryItem, type FetchState, SortDirection } from "../types";
 import { getInventory } from "../api/inventory";
-import { SearchBar } from "./SearchBar";
+import { SearchBar } from "../components/SearchBar";
 
 export function CatalogPage() {
     //We are going to use a hook called useState to store information between component re-renders

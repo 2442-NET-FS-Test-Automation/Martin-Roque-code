@@ -1,17 +1,30 @@
 import './App.css'
-import { CatalogPage } from './components/CatalogPage';
+import { CatalogPage } from './pages/CatalogPage';
+import { BookDetail } from './pages/BookDetail';
+import { About } from './pages/About';
+import { NavLink, Route, Routes } from 'react-router-dom';
+
 
 function App() {
 
   return (
     <>
-      <div className='app-header'></div>
-      <h1> App </h1>
-      <header>
+      <div className='app'></div>
+      <header className='app-header'>
+        <h1>Library</h1>
+        <nav className='app-header'>
+          <NavLink to="/">Catalog</NavLink>
+          <NavLink to="/about">About</NavLink>
+        </nav>
       </header>
 
         <main>
-          <CatalogPage/>
+          <Routes>
+            <Route path='/' element={<CatalogPage />}/>
+            <Route path='/inventory/:sku' element={<BookDetail />} />
+            <Route path='/about' element={<About />}/>
+            <Route path='*' element={<p>Page not found</p>}/>
+          </Routes>
         </main>
     </>
   );
