@@ -2,6 +2,7 @@ import './App.css'
 import { CatalogPage } from './pages/CatalogPage';
 import { BookDetail } from './pages/BookDetail';
 import { About } from './pages/About';
+import { LoginPage } from './pages/LoginPage';
 import { NavLink, Route, Routes } from 'react-router-dom';
 
 
@@ -23,6 +24,7 @@ function App() {
             <Route path='/' element={<CatalogPage />}/>
             <Route path='/inventory/:sku' element={<BookDetail />} />
             <Route path='/about' element={<About />}/>
+            <Route path='/login' element={<LoginPage/>}/>
             <Route path='*' element={<p>Page not found</p>}/>
           </Routes>
         </main>
