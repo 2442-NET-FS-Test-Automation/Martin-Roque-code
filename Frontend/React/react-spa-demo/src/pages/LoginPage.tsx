@@ -12,6 +12,12 @@ export function LoginPage() {
 
     const navigate = useNavigate();
 
+    // const usernameRef = useRef<HTMLInputElement>(null);
+
+    // useEffect(() => {
+    //     usernameRef.current?.focus();
+    // })
+
     async function onSubmit(e: SubmitEvent<HTMLFormElement>) {
         e.preventDefault(); //stop try to sen a POST to a URL
 

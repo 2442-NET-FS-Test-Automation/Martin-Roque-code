@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import type { SubmitEvent } from "react";
 import { createBook, deleteBook } from "../api/inventory";
 import { useAuth } from "../auth/useAuth";
@@ -11,6 +11,12 @@ export function AdminPage() {
     const [price, setPrice] = useState(0);
     const [stock, setStock] = useState(0);
     const [message, setMessage] = useState<string | null>(null);
+
+    //Uncontrolled input/form
+    const quickRef = useRef<HTMLInputElement>(null);
+    function copyFromQuickFind() {
+        if(quickRef.current) setSku(quickRef.current.value);
+    }
 
     async function onCreate(e: SubmitEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -64,6 +70,14 @@ export function AdminPage() {
                     Deleted by sku
                 </button>
             </form>
+
+            <div className="quick-find">
+                <input ref={quickRef} defaultValue="" placeholder="Quick SKU (Uncontrolled)"/>
+                <button type="button" onClick={copyFromQuickFind}>
+                    Copy into form
+                </button>
+            </div>
+
             {message && <p>{message}</p>}
         </section>
     );

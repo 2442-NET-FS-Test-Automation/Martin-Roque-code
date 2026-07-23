@@ -6,9 +6,12 @@ import { LoginPage } from './pages/LoginPage';
 import { NavLink, Route, Routes } from 'react-router-dom';
 import { RequireAuth } from './components/RequireAuth';
 import { AdminPage } from './pages/AdminPage';
+import { useAuth } from './auth/useAuth';
 
 
 function App() {
+
+  const { status, user, logout} = useAuth();
 
   return (
     <>
@@ -18,7 +21,22 @@ function App() {
         <nav className='app-header'>
           <NavLink to="/">Catalog</NavLink>
           <NavLink to="/about">About</NavLink>
+          {user?.role === "admin" && <NavLink to="/admin">Admin</NavLink>}
         </nav>
+        <div className='auth-box'>
+          {status === "authenticated" ? (
+            <>
+              <span>
+                {user?.name} ({user?.role})
+              </span>
+              <button type="button" onClick={logout}>
+                Sign out
+              </button>
+            </>
+          ) : (
+            <NavLink to="/login">Sign in</NavLink>
+          )}
+        </div>
       </header>
 
         <main>

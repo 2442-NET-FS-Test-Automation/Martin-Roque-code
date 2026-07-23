@@ -1,4 +1,4 @@
-import { createContext, useEffect, useReducer } from "react";
+import { createContext, useReducer } from "react";
 import type { ReactNode } from "react";
 import { login as loginRequest } from "../api/auth";
 import { decodeToken } from "./jwt";
@@ -13,22 +13,31 @@ interface AuthContextValue extends AuthState {
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
+function initAuthState(): AuthState {
+    const token = getToken();
+    const user = token ? decodeToken(token) : null;
+
+    if (!user) return initialAuthState;
+
+    return {status: "authenticated", user, error:null};
+}
+
 export function AuthProvider({ children }: {children: ReactNode}){
-    const [state, dispatch] = useReducer(authReducer, initialAuthState);
+    const [state, dispatch] = useReducer(authReducer, undefined, initAuthState);
 
-    useEffect(() => {
+    // useEffect(() => {
 
-        const token = getToken();
+    //     const token = getToken();
 
-        if(!token) return; // if there is no token
+    //     if(!token) return; // if there is no token
 
-        const user = decodeToken(token);
+    //     const user = decodeToken(token);
 
-        // Calling the login_success case of our reducer function via dispatch
-        if (user) dispatch( {type: "login_success", user});
-        else clearToken();
+    //     // Calling the login_success case of our reducer function via dispatch
+    //     if (user) dispatch( {type: "login_success", user});
+    //     else clearToken();
 
-    }, []);
+    // }, []);
 
     // Our login method 
     async function login(username: string, password: string): Promise<boolean> {
