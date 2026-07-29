@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
@@ -7,11 +6,11 @@ using Library.ControllerApi.DTOs;
 
 namespace Library.Tests.Integration;
 
-public class AuthApiTests : IClassFixture<WebApplicationFactory<Program>>
+public class AuthApiTests : IClassFixture<LibraryApiFactory>
 {
     private readonly HttpClient _client;
 
-    public AuthApiTests(WebApplicationFactory<Program> factory)
+    public AuthApiTests(LibraryApiFactory factory)
     {
         _client = factory.CreateClient();
     }
