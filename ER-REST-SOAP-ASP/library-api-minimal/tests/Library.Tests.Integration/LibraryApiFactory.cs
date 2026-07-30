@@ -27,3 +27,6 @@ public class FakeSupplierClient : ISupplierClient
         return Task.FromResult<decimal?>(99.99m);
     }
 }
+
+[CollectionDefinition("Library API")]
+public class LibraryApiCollection : ICollectionFixture<LibraryApiFactory>;

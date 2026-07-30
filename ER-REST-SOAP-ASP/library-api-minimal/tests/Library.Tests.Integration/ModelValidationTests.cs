@@ -7,7 +7,9 @@ using Library.ControllerApi.DTOs;
 
 namespace Library.Tests.Integration;
 
-public class ModelValidationTests : IClassFixture<LibraryApiFactory>
+[Collection("Library API")]
+
+public class ModelValidationTests
 {
     private readonly HttpClient _client;
 
