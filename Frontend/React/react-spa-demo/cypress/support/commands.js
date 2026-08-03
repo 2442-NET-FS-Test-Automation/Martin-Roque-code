@@ -1,5 +1,6 @@
 Cypress.Commands.add("resetInventory", () => {
-    cy.request("POST","http://localhost:5172/inventory/rest")
+    // NOTE: the minimal API's route is literally "/inventory/rest" (typo in Program.cs)
+    cy.request("POST", "http://localhost:5172/inventory/rest")
 });
 
 Cypress.Commands.add("login", (username, password) => {
