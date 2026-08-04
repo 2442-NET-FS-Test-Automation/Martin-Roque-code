@@ -1,15 +1,19 @@
 using FluentAssertions;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using Xunit.Abstractions;
 
-namespace Library.Testt.E2E.Selenium;
+namespace Library.Tests.E2E.Selenium;
 
 public class SmokeTests : IDisposable
 {
     private readonly ChromeDriver _driver;
+    private readonly ITestOutputHelper _output;
 
-    public SmokeTests()
+    public SmokeTests(ITestOutputHelper output)
     {
+        _output = output;
+
         var options = new ChromeOptions();
         options.AddArgument("--headless=new");
         options.AddArgument("--windows.size=1280,900");
@@ -43,6 +47,7 @@ public class SmokeTests : IDisposable
 
         //Assert
         var cards = _driver.FindElements(By.CssSelector("article.card"));
+        _output.WriteLine(cards.ToString());
         cards.Should().NotBeEmpty();
     }
 }
